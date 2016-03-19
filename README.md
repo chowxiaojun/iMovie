@@ -7,5 +7,6 @@ Udacity《Developing Android Apps》课程的课程项目作业，在这个项�
  3. [Udacity Android Developer Nanodegree - Core App Quality Guidelines](http://udacity.github.io/android-nanodegree-guidelines/core.html)
  
 该项目基于themoviedb.org的API实现，相关文档以及申请API_KEY的网址如下：
+
 1. [themoviedb.org](https://www.themoviedb.org/documentation/api)
 2. [The Movie Database API](http://docs.themoviedb.apiary.io/#reference/configuration)
