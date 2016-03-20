@@ -1,6 +1,7 @@
 package com.xiroid.imovie.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 import com.xiroid.imovie.R;
+import com.xiroid.imovie.activity.DetailActivity;
 import com.xiroid.imovie.model.MovieInfo;
 
 import org.json.JSONArray;
@@ -50,7 +52,9 @@ public class MoviesFragment extends Fragment {
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                intent.putExtra("data", (MovieInfo) mImageAdapter.getItem(position));
+                startActivity(intent);
             }
         });
         return rootView;

@@ -1,10 +1,13 @@
 package com.xiroid.imovie.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by xiaojunzhou on 16/3/19.
  * @function 存储影片信息
  */
-public class MovieInfo {
+public class MovieInfo implements Parcelable {
     private static final String BASE_IMG_URL ="http://image.tmdb.org/t/p/w185/";
 
     private String poster_path;  // 封面图片路径
@@ -21,6 +24,37 @@ public class MovieInfo {
     private boolean video;
     private double vote_average;
 
+    public MovieInfo() {
+
+    }
+
+    public MovieInfo(Parcel in) {
+        poster_path = in.readString();
+        adult = in.readByte() != 0;
+        overview = in.readString();
+        release_date = in.readString();
+        id = in.readInt();
+        original_title = in.readString();
+        original_language = in.readString();
+        title = in.readString();
+        backdrop_path = in.readString();
+        popularity = in.readDouble();
+        vote_count = in.readInt();
+        video = in.readByte() != 0;
+        vote_average = in.readDouble();
+    }
+
+    public static final Creator<MovieInfo> CREATOR = new Creator<MovieInfo>() {
+        @Override
+        public MovieInfo createFromParcel(Parcel in) {
+            return new MovieInfo(in);
+        }
+
+        @Override
+        public MovieInfo[] newArray(int size) {
+            return new MovieInfo[size];
+        }
+    };
 
     public String getPoster_path() {
         return poster_path;
@@ -128,5 +162,27 @@ public class MovieInfo {
 
     public String getPoster() {
         return new StringBuilder(BASE_IMG_URL).append(poster_path).toString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(poster_path);
+        dest.writeByte((byte) (adult ? 1 : 0));
+        dest.writeString(overview);
+        dest.writeString(release_date);
+        dest.writeInt(id);
+        dest.writeString(original_title);
+        dest.writeString(original_language);
+        dest.writeString(title);
+        dest.writeString(backdrop_path);
+        dest.writeDouble(popularity);
+        dest.writeInt(vote_count);
+        dest.writeByte((byte) (video ? 1 : 0));
+        dest.writeDouble(vote_average);
     }
 }
