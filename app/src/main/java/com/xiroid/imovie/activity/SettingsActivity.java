@@ -99,9 +99,13 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         setupActionBar();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void onBuildHeaders(List<Header> target) {
-
+        loadHeadersFromResource(R.xml.pref_headers, target);
     }
 
     /**
@@ -161,7 +165,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("sort"));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_sort_key)));
         }
 
         @Override

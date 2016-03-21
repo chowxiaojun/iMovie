@@ -2,9 +2,11 @@ package com.xiroid.imovie.fragment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -75,10 +77,12 @@ public class MoviesFragment extends Fragment {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             String moviesStr = null;
-
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String sortBy = sharedPref.getString(
+                    getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
             try {
                 // /movie/top_rated
-                final String MOVIES_BASE_URL = "http://api.themoviedb.org/3/movie/popular";
+                final String MOVIES_BASE_URL = "http://api.themoviedb.org/3/movie/" + sortBy;
                 final String APIKEY_PARAM = "api_key";
                 Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
                         .appendQueryParameter(APIKEY_PARAM, api_key)
