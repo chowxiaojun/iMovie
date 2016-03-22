@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 import com.xiroid.imovie.R;
+import com.xiroid.imovie.SimpleImageView;
 import com.xiroid.imovie.activity.DetailActivity;
 import com.xiroid.imovie.model.MovieInfo;
 
@@ -55,7 +57,9 @@ public class MoviesFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getActivity(), DetailActivity.class);
-                intent.putExtra("data", (MovieInfo) mImageAdapter.getItem(position));
+                MovieInfo movieInfo = (MovieInfo) mImageAdapter.getItem(position);
+                Log.d("MoviesFragment", movieInfo.toString());
+                intent.putExtra("data", movieInfo);
                 startActivity(intent);
             }
         });
@@ -151,19 +155,11 @@ public class MoviesFragment extends Fragment {
             if (item != null) {
                 try {
                     // MovieInfo中的很多字段不一定有用，看需求
-                    movieInfo.setPoster_path(item.getString("poster_path"));
-                    movieInfo.setAdult(item.getBoolean("adult"));
+                    movieInfo.setOriginalTitle(item.getString("original_title"));
+                    movieInfo.setPosterPath(item.getString("poster_path"));
                     movieInfo.setOverview(item.getString("overview"));
-                    movieInfo.setRelease_date(item.getString("release_date"));
-                    movieInfo.setId(item.getInt("id"));
-                    movieInfo.setOriginal_title(item.getString("original_title"));
-                    movieInfo.setOriginal_language(item.getString("original_language"));
-                    movieInfo.setTitle(item.getString("title"));
-                    movieInfo.setBackdrop_path(item.getString("backdrop_path"));
-                    movieInfo.setPopularity(item.getDouble("popularity"));
-                    movieInfo.setVote_count(item.getInt("vote_count"));
-                    movieInfo.setVideo(item.getBoolean("video"));
-                    movieInfo.setVote_average(item.getDouble("vote_average"));
+                    movieInfo.setVoteAverage(item.getDouble("vote_average"));
+                    movieInfo.setReleaseDate(item.getString("release_date"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -189,7 +185,7 @@ public class MoviesFragment extends Fragment {
         }
 
         public Object getItem(int position) {
-            return null;
+            return movieInfos.get(position);
         }
 
         public long getItemId(int position) {
@@ -197,15 +193,14 @@ public class MoviesFragment extends Fragment {
         }
 
         public View getView(int position, View convertView, ViewGroup parent) {
-            ImageView imageView;
+            SimpleImageView imageView;
             if (convertView == null) {
-                imageView = new ImageView(mContext);
+                imageView = new SimpleImageView(mContext);
                 imageView.setLayoutParams(new GridView.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-                imageView.setPadding(8, 8, 8, 8);
             } else {
-                imageView = (ImageView) convertView;
+                imageView = (SimpleImageView) convertView;
             }
 
             Picasso.with(mContext).load(movieInfos.get(position).getPoster()).into(imageView);
