@@ -18,6 +18,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
+import com.xiroid.imovie.BuildConfig;
 import com.xiroid.imovie.R;
 import com.xiroid.imovie.SimpleImageView;
 import com.xiroid.imovie.activity.DetailActivity;
@@ -77,19 +78,19 @@ public class MoviesFragment extends Fragment {
         @Override
         protected String doInBackground(Void... params) {
 
-            String api_key = "";
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             String moviesStr = null;
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
             String sortBy = sharedPref.getString(
                     getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
+            Log.d("xiaojunzhou", sortBy);
             try {
                 // /movie/top_rated
                 final String MOVIES_BASE_URL = "http://api.themoviedb.org/3/movie/" + sortBy;
                 final String APIKEY_PARAM = "api_key";
                 Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
-                        .appendQueryParameter(APIKEY_PARAM, api_key)
+                        .appendQueryParameter(APIKEY_PARAM, BuildConfig.THE_MOVIE_API_KEY)
                         .build();
                 URL url = new URL(builtUri.toString());
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -120,6 +121,7 @@ public class MoviesFragment extends Fragment {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
             return moviesStr;
         }
 
