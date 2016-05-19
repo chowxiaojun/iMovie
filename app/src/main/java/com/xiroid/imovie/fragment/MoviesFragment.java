@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -73,6 +74,13 @@ public class MoviesFragment extends Fragment {
         new FetchMoviesTask().execute();
     }
 
+    // SUGGESTION:
+    // In order to make your codes reusable and structural, you can consider to refactor your codes
+    // and put this class in a separate Java file.
+
+    // To learn more, you can also try to use Retrofit library in your future projects to handle
+    // fetching data using third party API and network operations. It can make your life easier.
+    // Ref: http://square.github.io/retrofit/
     class FetchMoviesTask extends AsyncTask<Void, Void, String> {
 
         @Override
@@ -128,12 +136,14 @@ public class MoviesFragment extends Fragment {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            try {
-                JSONObject jsonObject = new JSONObject(s);
-                JSONArray jsonArray = jsonObject.getJSONArray("results");
-                mImageAdapter.add(parseData(jsonArray));
-            } catch (JSONException e) {
-                e.printStackTrace();
+            if (!TextUtils.isEmpty(s)) {
+                try {
+                    JSONObject jsonObject = new JSONObject(s);
+                    JSONArray jsonArray = jsonObject.getJSONArray("results");
+                    mImageAdapter.add(parseData(jsonArray));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
