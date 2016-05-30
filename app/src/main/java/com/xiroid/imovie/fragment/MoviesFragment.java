@@ -42,6 +42,7 @@ import java.util.ArrayList;
  * A placeholder fragment containing a simple view.
  */
 public class MoviesFragment extends Fragment {
+    private static final String TAG = MoviesFragment.class.getSimpleName();
 
     private GridView mGridView;
     private ImageAdapter mImageAdapter;
@@ -92,7 +93,6 @@ public class MoviesFragment extends Fragment {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
             String sortBy = sharedPref.getString(
                     getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
-            Log.d("xiaojunzhou", sortBy);
             try {
                 // /movie/top_rated
                 final String MOVIES_BASE_URL = "http://api.themoviedb.org/3/movie/" + sortBy;
@@ -100,6 +100,7 @@ public class MoviesFragment extends Fragment {
                 Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
                         .appendQueryParameter(APIKEY_PARAM, BuildConfig.THE_MOVIE_API_KEY)
                         .build();
+                Log.d(TAG, builtUri.toString());
                 URL url = new URL(builtUri.toString());
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -109,7 +110,7 @@ public class MoviesFragment extends Fragment {
 
                 // Read the input stream into a String
                 InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
+                StringBuilder buffer = new StringBuilder();
                 if (inputStream == null) {
                     return moviesStr;
                 }

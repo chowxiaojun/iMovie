@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,39 +8,56 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:background="#DDD">
+        android:layout_height="96dp"
+        android:gravity="center_vertical"
+        android:background="#009788"
+        android:padding="16dp">
 
-        <com.xiroid.imovie.SimpleImageView
-            android:layout_width="100dp"
-            android:layout_height="150dp"
-            android:id="@+id/iv_poster"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/txt_title"
+            android:fontFamily="sans-serif-condensed"
+            android:textSize="22sp"
+            android:textColor="#FFF"
+            android:text="@string/detail_title_placeholder"/>
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:orientation="vertical">
-        <TextView
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingRight="16dp"
+        android:paddingLeft="16dp">
+
+        <com.xiroid.imovie.SimpleImageView
+            android:layout_width="100dp"
+            android:layout_height="150dp"
+            android:id="@+id/iv_poster"
+            android:src="@drawable/placeholder"/>
+
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/title" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/rating" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/releaseDate" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/overview" />
+            android:layout_height="match_parent">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txt_rating"
+                android:text="@string/detail_rating_placeholder"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/releaseDate" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/txt_overview" />
 
-</LinearLayout>
+
+</ScrollView>

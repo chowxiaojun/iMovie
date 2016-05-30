@@ -15,17 +15,19 @@ public class DetailActivity extends AppCompatActivity {
 
     private static final String TAG = DetailActivity.class.getSimpleName();
 
-    private MovieInfo movieInfo;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
         Intent intent = getIntent();
         if (intent != null && intent.getParcelableExtra("data") != null) {
-            movieInfo = intent.getParcelableExtra("data");
+            MovieInfo movieInfo = intent.getParcelableExtra("data");
             // SUGGESTION:
             // Since from your codes, I can see that you are a really advanced student, in order to
             // learn more, you could also check a package called "butterknife". In the future, you
@@ -36,10 +38,10 @@ public class DetailActivity extends AppCompatActivity {
             // Also, a video tutorial:
             // https://www.youtube.com/watch?v=1A4LY8gUEDs
             SimpleImageView poster = (SimpleImageView) findViewById(R.id.iv_poster);
-            TextView title = (TextView) findViewById(R.id.title);
-            TextView rating = (TextView) findViewById(R.id.rating);
+            TextView title = (TextView) findViewById(R.id.txt_title);
+            TextView rating = (TextView) findViewById(R.id.txt_rating);
             TextView releaseDate = (TextView) findViewById(R.id.releaseDate);
-            TextView overview = (TextView) findViewById(R.id.overview);
+            TextView overview = (TextView) findViewById(R.id.txt_overview);
 
             Picasso.with(getApplicationContext())
                     .load(movieInfo.getPoster())
