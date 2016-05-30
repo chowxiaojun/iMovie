@@ -100,7 +100,6 @@ public class MoviesFragment extends Fragment {
                 Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
                         .appendQueryParameter(APIKEY_PARAM, BuildConfig.THE_MOVIE_API_KEY)
                         .build();
-                Log.d(TAG, builtUri.toString());
                 URL url = new URL(builtUri.toString());
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");

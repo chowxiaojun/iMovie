@@ -10,6 +10,7 @@ import android.os.Parcelable;
 public class MovieInfo implements Parcelable {
     private static final String BASE_IMG_URL ="http://image.tmdb.org/t/p/w185/";
 
+    private int id;
     private String posterPath;  // 封面图片路径
     private String overview;
     private String releaseDate;
@@ -22,6 +23,7 @@ public class MovieInfo implements Parcelable {
 
 
     protected MovieInfo(Parcel in) {
+        id = in.readInt();
         posterPath = in.readString();
         overview = in.readString();
         releaseDate = in.readString();
@@ -66,7 +68,6 @@ public class MovieInfo implements Parcelable {
         this.posterPath = posterPath;
     }
 
-
     public void setOverview(String overview) {
         this.overview = overview;
     }
@@ -85,7 +86,7 @@ public class MovieInfo implements Parcelable {
     }
 
     public String getPoster() {
-        return new StringBuilder(BASE_IMG_URL).append(posterPath).toString();
+        return BASE_IMG_URL + posterPath;
     }
 
     @Override
@@ -102,6 +103,7 @@ public class MovieInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
         dest.writeString(posterPath);
         dest.writeString(overview);
         dest.writeString(releaseDate);
