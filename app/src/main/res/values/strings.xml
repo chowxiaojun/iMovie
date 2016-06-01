@@ -16,6 +16,9 @@
     <string name="pref_sort_top_rated">top_rated</string>
 
     <!-- Movie detail -->
-    <string name="detail_title_placeholder">Movie Title</string>
-    <string name="detail_rating_placeholder">8.1/10</string>
+    <string name="txt_title_placeholder">Movie Title</string>
+    <string name="txt_rating_placeholder">8.1/10</string>
+    <string name="txt_overview_placeholder">overviewoveroverviewoverviewoverviewoverviewoverviewviewoverviewoverviewoverviewoverviewoverviewoverview</string>
+    <string name="txt_release_placeholder">2015</string>
+    <string name="btn_favorite_content_description">make as favorite</string>
 </resources>

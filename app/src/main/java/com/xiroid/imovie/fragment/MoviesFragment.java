@@ -167,6 +167,7 @@ public class MoviesFragment extends Fragment {
             if (item != null) {
                 try {
                     // MovieInfo中的很多字段不一定有用，看需求
+                    movieInfo.setId(item.getInt("id"));
                     movieInfo.setOriginalTitle(item.getString("original_title"));
                     movieInfo.setPosterPath(item.getString("poster_path"));
                     movieInfo.setOverview(item.getString("overview"));

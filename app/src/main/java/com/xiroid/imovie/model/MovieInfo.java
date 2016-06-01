@@ -43,6 +43,10 @@ public class MovieInfo implements Parcelable {
         }
     };
 
+    public int getId() {
+        return id;
+    }
+
     public String getPosterPath() {
         return posterPath;
     }
@@ -62,6 +66,10 @@ public class MovieInfo implements Parcelable {
 
     public double getVoteAverage() {
         return voteAverage;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setPosterPath(String posterPath) {

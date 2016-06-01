@@ -1,26 +1,25 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".fragment.DetailFragment"
-    tools:showIn="@layout/activity_detail">
+    tools:context=".fragment.DetailFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="96dp"
-        android:gravity="center_vertical"
         android:background="#009788"
+        android:gravity="center_vertical"
         android:padding="16dp">
 
         <TextView
+            android:id="@+id/txt_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/txt_title"
             android:fontFamily="sans-serif-condensed"
-            android:textSize="22sp"
+            android:text="@string/txt_title_placeholder"
             android:textColor="#FFF"
-            android:text="@string/detail_title_placeholder"/>
+            android:textSize="22sp" />
 
     </LinearLayout>
 
@@ -28,36 +27,74 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingRight="16dp"
-        android:paddingLeft="16dp">
+        android:padding="16dp">
 
         <com.xiroid.imovie.SimpleImageView
+            android:id="@+id/image_poster"
             android:layout_width="100dp"
             android:layout_height="150dp"
-            android:id="@+id/iv_poster"
-            android:src="@drawable/placeholder"/>
+            android:src="@drawable/placeholder" />
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginLeft="30dp"
+            android:orientation="vertical"
+            android:gravity="center_vertical">
+
             <TextView
+                android:id="@+id/txt_releaseDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/txt_release_placeholder"
+                android:textSize="20sp" />
+
+            <TextView
                 android:id="@+id/txt_rating"
-                android:text="@string/detail_rating_placeholder"/>
-            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/releaseDate" />
+                android:layout_marginBottom="10dp"
+                android:text="@string/txt_rating_placeholder"
+                android:textSize="14sp" />
+
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:contentDescription="@string/btn_favorite_content_description"
+                android:src="@drawable/ic_favorite_border_black" />
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/txt_overview" />
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/txt_overview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/txt_overview_placeholder"
+            android:textSize="14sp" />
+
+        <ListView
+            android:id="@+id/list_trailers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <ListView
+            android:id="@+id/list_reviews"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+</LinearLayout>
 
 
-</ScrollView>
