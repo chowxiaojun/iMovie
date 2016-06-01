@@ -57,11 +57,11 @@ public class DetailFragment extends Fragment {
                         .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
                         .into(poster);
                 if (releaseDate != null) {
-                    releaseDate.setText(movieInfo.getReleaseDate());
+                    releaseDate.setText(movieInfo.getReleaseDate().split("-")[0]);
                 }
 
                 if (rating != null) {
-                    rating.setText(Double.toString(movieInfo.getVoteAverage()));
+                    rating.setText(getString(R.string.txt_rating_format, Double.toString(movieInfo.getVoteAverage())));
                 }
 
                 if (overview != null) {

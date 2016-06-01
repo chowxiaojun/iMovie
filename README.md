@@ -16,4 +16,5 @@ Udacity《Developing Android Apps》课程的课程项目作业，在这个项�
 
 1. [picasso](http://square.github.io/picasso/)
 2. [Stetho](http://facebook.github.io/stetho/)：可通过Chrome桌面浏览器调试Android应用
+3. [CircularProgressView](https://github.com/rahatarmanahmed/CircularProgressView)
 
