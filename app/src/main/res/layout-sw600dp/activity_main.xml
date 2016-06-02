@@ -23,9 +23,9 @@
 
     <LinearLayout
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center">
+        android:layout_height="match_parent">
         <LinearLayout
             android:id="@+id/progress_view"
             android:layout_width="wrap_content"
@@ -60,17 +60,25 @@
             android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:baselineAligned="false"
             android:visibility="gone">
-            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
+            <fragment
                 android:id="@+id/fragment"
                 android:name="com.xiroid.imovie.fragment.MoviesFragment"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 tools:layout="@layout/fragment_main" />
+
+            <FrameLayout
+                android:id="@+id/movie_detail_container"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
         </LinearLayout>
+
+
     </LinearLayout>
 
 

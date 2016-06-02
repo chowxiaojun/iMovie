@@ -17,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.squareup.picasso.Picasso;
 import com.xiroid.imovie.BuildConfig;
@@ -47,7 +46,6 @@ public class MoviesFragment extends Fragment {
 
     private GridView mGridView;
     private ImageAdapter mImageAdapter;
-    private LinearLayout progressView;
     public MoviesFragment() {
     }
 
@@ -56,7 +54,6 @@ public class MoviesFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         mGridView = (GridView) rootView.findViewById(R.id.movies_gridview);
-        progressView = (LinearLayout) rootView.findViewById(R.id.progress_view);
         mImageAdapter = new ImageAdapter(getActivity());
         mGridView.setAdapter(mImageAdapter);
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -75,6 +72,10 @@ public class MoviesFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        loadMovies();
+    }
+
+    private void loadMovies() {
         new FetchMoviesTask().execute();
     }
 
@@ -114,13 +115,13 @@ public class MoviesFragment extends Fragment {
                 InputStream inputStream = urlConnection.getInputStream();
                 StringBuilder buffer = new StringBuilder();
                 if (inputStream == null) {
-                    return moviesStr;
+                    return null;
                 }
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
+                    buffer.append(line).append("\n");
                 }
 
                 if (buffer.length() >= 0) {
@@ -128,9 +129,9 @@ public class MoviesFragment extends Fragment {
                 }
 
             } catch (MalformedURLException e) {
-                e.printStackTrace();
+                return null;
             } catch (IOException e) {
-                e.printStackTrace();
+                return null;
             }
 
             return moviesStr;
@@ -144,11 +145,13 @@ public class MoviesFragment extends Fragment {
                     JSONObject jsonObject = new JSONObject(s);
                     JSONArray jsonArray = jsonObject.getJSONArray("results");
                     mImageAdapter.add(parseData(jsonArray));
-                    progressView.setVisibility(View.GONE);
                     mGridView.setVisibility(View.VISIBLE);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                ((Callback) getActivity()).onResult(0);
+            } else {
+                ((Callback) getActivity()).onResult(-1);
             }
         }
 
@@ -224,5 +227,9 @@ public class MoviesFragment extends Fragment {
             Picasso.with(mContext).load(movieInfos.get(position).getPoster()).into(imageView);
             return imageView;
         }
+    }
+
+    public interface Callback {
+        void onResult(int errCode);
     }
 }

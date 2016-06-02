@@ -37,6 +37,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.xiroid.imovie.activity.MainActivity" />
         </activity>
+
+        <provider
+            android:authorities="com.xiroid.imovie"
+            android:name=".data.MovieProvider"
+            android:exported="false"
+            android:enabled="true" />
     </application>
 
 </manifest>
