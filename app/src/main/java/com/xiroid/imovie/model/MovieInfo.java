@@ -16,6 +16,7 @@ public class MovieInfo implements Parcelable {
     private String releaseDate;
     private String originalTitle;
     private double voteAverage;
+    private int favorite;
 
     public MovieInfo() {
 
@@ -29,6 +30,7 @@ public class MovieInfo implements Parcelable {
         releaseDate = in.readString();
         originalTitle = in.readString();
         voteAverage = in.readDouble();
+        favorite = in.readInt();
     }
 
     public static final Creator<MovieInfo> CREATOR = new Creator<MovieInfo>() {
@@ -68,6 +70,14 @@ public class MovieInfo implements Parcelable {
         return voteAverage;
     }
 
+    public String getPoster() {
+        return BASE_IMG_URL + posterPath;
+    }
+
+    public int getFavorite() {
+        return favorite;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -93,8 +103,8 @@ public class MovieInfo implements Parcelable {
         this.voteAverage = voteAverage;
     }
 
-    public String getPoster() {
-        return BASE_IMG_URL + posterPath;
+    public void setFavorite(int favorite) {
+        this.favorite = favorite;
     }
 
     @Override
@@ -117,5 +127,6 @@ public class MovieInfo implements Parcelable {
         dest.writeString(releaseDate);
         dest.writeString(originalTitle);
         dest.writeDouble(voteAverage);
+        dest.writeInt(favorite);
     }
 }

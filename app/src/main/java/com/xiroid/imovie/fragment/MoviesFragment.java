@@ -3,6 +3,7 @@ package com.xiroid.imovie.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import com.xiroid.imovie.BuildConfig;
 import com.xiroid.imovie.R;
 import com.xiroid.imovie.SimpleImageView;
 import com.xiroid.imovie.activity.DetailActivity;
+import com.xiroid.imovie.data.MovieContract;
 import com.xiroid.imovie.model.MovieInfo;
 
 import org.json.JSONArray;
@@ -37,6 +39,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -46,12 +49,21 @@ public class MoviesFragment extends Fragment {
 
     private GridView mGridView;
     private ImageAdapter mImageAdapter;
+    private List<MovieInfo> movieInfos;
+
+    private static final String[] FAVORITE_PROJECTION = {
+            MovieContract.FavoriteEntry.COLUMN_MOVIE_ID
+    };
+
+    private static final int COL_FAVORITE_MOVIE_ID = 0;
+
     public MoviesFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         mGridView = (GridView) rootView.findViewById(R.id.movies_gridview);
         mImageAdapter = new ImageAdapter(getActivity());
@@ -72,6 +84,7 @@ public class MoviesFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        Log.d(TAG, "onStart");
         loadMovies();
     }
 
@@ -133,6 +146,37 @@ public class MoviesFragment extends Fragment {
             } catch (IOException e) {
                 return null;
             }
+            if (!TextUtils.isEmpty(moviesStr)) {
+                Cursor cursor = null;
+                try {
+                    JSONObject jsonObject = new JSONObject(moviesStr);
+                    JSONArray jsonArray = jsonObject.getJSONArray("results");
+                    movieInfos = parseData(jsonArray);
+                    cursor = getContext().getContentResolver().query(MovieContract.FavoriteEntry.CONTENT_URI,
+                            FAVORITE_PROJECTION,
+                            null,
+                            null,
+                            null
+                    );
+                    if (cursor != null) {
+                        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                            int movieId = cursor.getInt(COL_FAVORITE_MOVIE_ID);
+                            for (MovieInfo item : movieInfos) {
+                                if (item.getId() == movieId) {
+                                    item.setFavorite(1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+            }
 
             return moviesStr;
         }
@@ -140,15 +184,9 @@ public class MoviesFragment extends Fragment {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            if (!TextUtils.isEmpty(s)) {
-                try {
-                    JSONObject jsonObject = new JSONObject(s);
-                    JSONArray jsonArray = jsonObject.getJSONArray("results");
-                    mImageAdapter.add(parseData(jsonArray));
-                    mGridView.setVisibility(View.VISIBLE);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+            if (movieInfos != null) {
+                mImageAdapter.add(movieInfos);
+                mGridView.setVisibility(View.VISIBLE);
                 ((Callback) getActivity()).onResult(0);
             } else {
                 ((Callback) getActivity()).onResult(-1);
@@ -192,15 +230,17 @@ public class MoviesFragment extends Fragment {
 
     class ImageAdapter extends BaseAdapter {
         private Context mContext;
-        private ArrayList<MovieInfo> movieInfos = new ArrayList<MovieInfo>();
+        private List<MovieInfo> movieInfos = new ArrayList<MovieInfo>();
+
         public ImageAdapter(Context c) {
             mContext = c;
         }
 
-        public void add(ArrayList<MovieInfo> movieInfos) {
+        public void add(List<MovieInfo> movieInfos) {
             this.movieInfos = movieInfos;
             notifyDataSetChanged();
         }
+
         public int getCount() {
             return movieInfos.size();
         }
