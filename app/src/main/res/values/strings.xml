@@ -12,8 +12,10 @@
     <string name="pref_sort_key">sort</string>
     <string name="pref_sort_label_popular">Popular</string>
     <string name="pref_sort_label_top_rated">Top_rated</string>
+    <string name="pref_sort_label_favorite">Favorite</string>
     <string name="pref_sort_popular">popular</string>
     <string name="pref_sort_top_rated">top_rated</string>
+    <string name="pref_sort_favorite">favorite</string>
 
     <string name="txt_main_loading">loading...</string>
     <string name="txt_main_err">Network Error</string>

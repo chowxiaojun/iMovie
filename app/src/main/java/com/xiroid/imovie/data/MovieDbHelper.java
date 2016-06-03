@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.xiroid.imovie.data.MovieContract.FavoriteEntry;
+
 /**
  * 数据库：创建和升级
  *
@@ -21,7 +23,17 @@ public class MovieDbHelper extends SQLiteOpenHelper{
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // TODO: 数据库表创建
+        // SQL 语句
+        final String SQL_CREATE_FAVORITE_TABLE = "CREATE TABLE " + FavoriteEntry.TABLE_NAME + " (" +
+                FavoriteEntry._ID + " INTEGER PRIMARY KEY, " +
+                FavoriteEntry.COLUMN_MOVIE_ID + " INTEGER UNIQUE NOT NULL, " +
+                FavoriteEntry.COLUMN_MOVIE_TITLE + " TEXT NOT NULL, " +
+                FavoriteEntry.COLUMN_MOVIE_OVERVIEW + " TEXT NOT NULL, " +
+                FavoriteEntry.COLUMN_MOVIE_RELEASE_DATE + " TEXT NOT NULL, " +
+                FavoriteEntry.COLUMN_MOVIE_VOTE_AVERAGE + " REAL NOT NULL, " +
+                FavoriteEntry.COLUMN_MOVIE_POSTER + " TEXT NOT NULL " + ");";
+        // 执行SQL语句，创建喜欢电影的表
+        db.execSQL(SQL_CREATE_FAVORITE_TABLE);
     }
 
     @Override
