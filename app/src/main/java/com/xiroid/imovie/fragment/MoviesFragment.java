@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,10 +51,20 @@ public class MoviesFragment extends Fragment {
     private List<MovieInfo> movieInfos;
 
     private static final String[] FAVORITE_PROJECTION = {
-            MovieContract.FavoriteEntry.COLUMN_MOVIE_ID
+            MovieContract.FavoriteEntry.COLUMN_MOVIE_ID,
+            MovieContract.FavoriteEntry.COLUMN_MOVIE_TITLE,
+            MovieContract.FavoriteEntry.COLUMN_MOVIE_OVERVIEW,
+            MovieContract.FavoriteEntry.COLUMN_MOVIE_RELEASE_DATE,
+            MovieContract.FavoriteEntry.COLUMN_MOVIE_VOTE_AVERAGE,
+            MovieContract.FavoriteEntry.COLUMN_MOVIE_POSTER
     };
 
     private static final int COL_FAVORITE_MOVIE_ID = 0;
+    private static final int COL_FAVORITE_MOVIE_TITLE = 1;
+    private static final int COL_FAVORITE_MOVIE_OVERVIEW = 2;
+    private static final int COL_FAVORITE_MOVIE_RELEASE_DATE = 3;
+    private static final int COL_FAVORITE_MOVIE_VOTE_AVERAGE = 4;
+    private static final int COL_FAVORITE_MOVIE_POSTER = 5;
 
     public MoviesFragment() {
     }
@@ -99,17 +108,63 @@ public class MoviesFragment extends Fragment {
     // To learn more, you can also try to use Retrofit library in your future projects to handle
     // fetching data using third party API and network operations. It can make your life easier.
     // Ref: http://square.github.io/retrofit/
-    class FetchMoviesTask extends AsyncTask<Void, Void, String> {
+    class FetchMoviesTask extends AsyncTask<Void, Void, Void> {
 
         @Override
-        protected String doInBackground(Void... params) {
-
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            String moviesStr = null;
+        protected Void doInBackground(Void... params) {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
             String sortBy = sharedPref.getString(
                     getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
+            String favorite = getResources().getString(R.string.pref_sort_favorite);
+            if (sortBy.equals(favorite)) {
+                getFavoritesFromDb();
+            } else {
+                getMoviesFromNetwork(sortBy);
+            }
+
+            return null;
+        }
+
+        private void getFavoritesFromDb() {
+            Cursor cursor = null;
+            try {
+                cursor = getContext().getContentResolver().query(MovieContract.FavoriteEntry.CONTENT_URI,
+                        FAVORITE_PROJECTION,
+                        null,
+                        null,
+                        null
+                );
+                if (cursor != null) {
+                    movieInfos = new ArrayList<>();
+                    for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                        int movieId = cursor.getInt(COL_FAVORITE_MOVIE_ID);
+                        MovieInfo movieInfo = new MovieInfo();
+                        movieInfo.setFavorite(1);
+                        movieInfo.setId(cursor.getInt(COL_FAVORITE_MOVIE_ID));
+                        movieInfo.setOriginalTitle(cursor.getString(COL_FAVORITE_MOVIE_TITLE));
+                        movieInfo.setOverview(cursor.getString(COL_FAVORITE_MOVIE_OVERVIEW));
+                        movieInfo.setReleaseDate(cursor.getString(COL_FAVORITE_MOVIE_RELEASE_DATE));
+                        movieInfo.setPosterPath(cursor.getString(COL_FAVORITE_MOVIE_POSTER));
+                        movieInfo.setVoteAverage(cursor.getDouble(COL_FAVORITE_MOVIE_VOTE_AVERAGE));
+                        movieInfos.add(movieInfo);
+                    }
+                }
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        }
+
+        /**
+         * 从网络上获取数据
+         *
+         * @param sortBy
+         */
+        private void getMoviesFromNetwork(String sortBy) {
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+            String moviesStr = null;
             try {
                 // /movie/top_rated
                 final String MOVIES_BASE_URL = "http://api.themoviedb.org/3/movie/" + sortBy;
@@ -128,7 +183,7 @@ public class MoviesFragment extends Fragment {
                 InputStream inputStream = urlConnection.getInputStream();
                 StringBuilder buffer = new StringBuilder();
                 if (inputStream == null) {
-                    return null;
+                    return;
                 }
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -141,10 +196,8 @@ public class MoviesFragment extends Fragment {
                     moviesStr = buffer.toString();
                 }
 
-            } catch (MalformedURLException e) {
-                return null;
             } catch (IOException e) {
-                return null;
+                return;
             }
             if (!TextUtils.isEmpty(moviesStr)) {
                 Cursor cursor = null;
@@ -177,13 +230,11 @@ public class MoviesFragment extends Fragment {
                     }
                 }
             }
-
-            return moviesStr;
         }
 
         @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
             if (movieInfos != null) {
                 mImageAdapter.add(movieInfos);
                 mGridView.setVisibility(View.VISIBLE);
@@ -193,6 +244,13 @@ public class MoviesFragment extends Fragment {
             }
         }
 
+
+        /**
+         * 解析JSON数据
+         *
+         * @param data json data
+         * @return a List of MovieInfo
+         */
         private ArrayList<MovieInfo> parseData(JSONArray data) {
             ArrayList<MovieInfo> infos = new ArrayList<MovieInfo>();
             if (data != null) {
