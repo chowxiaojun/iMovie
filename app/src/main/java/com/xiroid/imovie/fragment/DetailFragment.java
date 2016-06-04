@@ -2,19 +2,38 @@ package com.xiroid.imovie.fragment;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.xiroid.imovie.BuildConfig;
 import com.xiroid.imovie.R;
 import com.xiroid.imovie.SimpleImageView;
 import com.xiroid.imovie.data.MovieContract;
 import com.xiroid.imovie.model.MovieInfo;
+import com.xiroid.imovie.model.VideoInfo;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -27,6 +46,8 @@ public class DetailFragment extends Fragment {
     private ImageButton mFavoriteBtn;
 
     private MovieInfo movieInfo;
+    private List<VideoInfo> videoInfos;
+
     public DetailFragment() {
     }
 
@@ -105,8 +126,136 @@ public class DetailFragment extends Fragment {
                 if (overview != null) {
                     overview.setText(movieInfo.getOverview());
                 }
+                new FetchTrailersTask().execute(Integer.toString(movieInfo.getId()));
             }
         }
         return rootView;
+    }
+
+    class FetchTrailersTask extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... params) {
+            if (!TextUtils.isEmpty(params[0])) {
+                getTrailers(params[0]);
+            }
+            return null;
+        }
+
+        /**
+         * 获取预览片信息
+         */
+        private void getTrailers(String movieId) {
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+            String moviesStr = null;
+            try {
+                // /movie/{id}/videos
+                final String MOVIES_BASE_URL = "http://api.themoviedb.org/3/movie/" + movieId + "/videos";
+                final String APIKEY_PARAM = "api_key";
+                Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
+                        .appendQueryParameter(APIKEY_PARAM, BuildConfig.THE_MOVIE_API_KEY)
+                        .build();
+                URL url = new URL(builtUri.toString());
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+                urlConnection.connect();
+
+                // Read the input stream into a String
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuilder buffer = new StringBuilder();
+                if (inputStream == null) {
+                    return;
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line).append("\n");
+                }
+
+                if (buffer.length() >= 0) {
+                    moviesStr = buffer.toString();
+                }
+
+            } catch (IOException e) {
+                return;
+            }
+            if (!TextUtils.isEmpty(moviesStr)) {
+                try {
+                    JSONObject jsonObject = new JSONObject(moviesStr);
+                    JSONArray jsonArray = jsonObject.getJSONArray("results");
+                    videoInfos = parseData(jsonArray);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            if (videoInfos != null && videoInfos.size() > 0 && getView() != null) {
+                LinearLayout container = (LinearLayout) getView()
+                        .findViewById(R.id.trailers_container);
+                for (VideoInfo videoInfo : videoInfos) {
+                    LinearLayout itemRoot = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
+                            R.layout.layout_trailer_item, null, false);
+                    TextView nameTxt = (TextView) itemRoot.findViewById(R.id.txt_name);
+                    nameTxt.setText(videoInfo.getName());
+                    itemRoot.setTag(videoInfo);
+                    itemRoot.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            VideoInfo info = (VideoInfo) v.getTag();
+                            String url = info.getUrl();
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            intent.setData(Uri.parse(info.getUrl()));
+                            startActivity(intent);
+                        }
+                    });
+                    container.addView(itemRoot);
+                }
+            }
+        }
+
+        /**
+         * 解析JSON数据
+         *
+         * @param data json data
+         * @return a List of VideoInfo
+         */
+        private ArrayList<VideoInfo> parseData(JSONArray data) {
+            ArrayList<VideoInfo> infos = new ArrayList<>();
+            if (data != null) {
+                for (int i = 0; i < data.length(); i++) {
+                    try {
+                        JSONObject item = (JSONObject) data.get(i);
+                        infos.add(parseVideoInfo(item));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return infos;
+        }
+
+        private VideoInfo parseVideoInfo(JSONObject item) {
+            VideoInfo videoInfo = new VideoInfo();
+            if (item != null) {
+                try {
+                    videoInfo.setId(item.getString("id"));
+                    videoInfo.setName(item.getString("name"));
+                    videoInfo.setKey(item.getString("key"));
+                    videoInfo.setType(item.getString("type"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return videoInfo;
+        }
     }
 }
