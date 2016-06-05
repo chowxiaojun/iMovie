@@ -23,7 +23,7 @@ public class DetailActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             Bundle arguments = new Bundle();
-            arguments.putParcelable(DetailFragment.DETAIL_DATA, getIntent().getData());
+            arguments.putParcelable(DetailFragment.DETAIL_DATA, getIntent().getParcelableExtra("data"));
 
             DetailFragment fragment = new DetailFragment();
             fragment.setArguments(arguments);

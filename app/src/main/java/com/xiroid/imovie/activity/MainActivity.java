@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import com.xiroid.imovie.R;
 import com.xiroid.imovie.fragment.DetailFragment;
 import com.xiroid.imovie.fragment.MoviesFragment;
+import com.xiroid.imovie.model.MovieInfo;
 
 public class MainActivity extends AppCompatActivity implements MoviesFragment.Callback {
 
@@ -32,7 +34,6 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
         setSupportActionBar(toolbar);
         mLoadingView = (LinearLayout) findViewById(R.id.progress_view);
         mContentView = (LinearLayout) findViewById(R.id.content);
-        errorTxt = (TextView) findViewById(R.id.txt_err);
        if (findViewById(R.id.movie_detail_container) != null) {
             mTwoPane = true;
             // 当设备旋转时，Fragment不会重复创建，因为Activity会重建
@@ -67,12 +68,20 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
     }
 
     @Override
-    public void onResult(int errCode) {
+    public void onResult() {
         mLoadingView.setVisibility(View.GONE);
-        if (errCode != 0) {
+        mContentView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onItemClick(MovieInfo movieInfo) {
+        if (mTwoPane) {
 
         } else {
-            mContentView.setVisibility(View.VISIBLE);
+            Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+            Log.d("MoviesFragment", movieInfo.toString());
+            intent.putExtra("data", movieInfo);
+            startActivity(intent);
         }
     }
 

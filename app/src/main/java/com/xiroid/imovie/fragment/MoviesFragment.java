@@ -1,7 +1,6 @@
 package com.xiroid.imovie.fragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
@@ -18,12 +17,13 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.xiroid.imovie.BuildConfig;
 import com.xiroid.imovie.R;
 import com.xiroid.imovie.SimpleImageView;
-import com.xiroid.imovie.activity.DetailActivity;
+import com.xiroid.imovie.activity.MainActivity;
 import com.xiroid.imovie.data.MovieContract;
 import com.xiroid.imovie.model.MovieInfo;
 
@@ -75,16 +75,15 @@ public class MoviesFragment extends Fragment {
         Log.d(TAG, "onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         mGridView = (GridView) rootView.findViewById(R.id.movies_gridview);
+        TextView textView = (TextView) rootView.findViewById(R.id.empty_view);
+        mGridView.setEmptyView(textView);
         mImageAdapter = new ImageAdapter(getActivity());
         mGridView.setAdapter(mImageAdapter);
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getActivity(), DetailActivity.class);
                 MovieInfo movieInfo = (MovieInfo) mImageAdapter.getItem(position);
-                Log.d("MoviesFragment", movieInfo.toString());
-                intent.putExtra("data", movieInfo);
-                startActivity(intent);
+                ((MainActivity) getActivity()).onItemClick(movieInfo);
             }
         });
         return rootView;
@@ -237,11 +236,8 @@ public class MoviesFragment extends Fragment {
             super.onPostExecute(result);
             if (movieInfos != null) {
                 mImageAdapter.add(movieInfos);
-                mGridView.setVisibility(View.VISIBLE);
-                ((Callback) getActivity()).onResult(0);
-            } else {
-                ((Callback) getActivity()).onResult(-1);
             }
+            ((Callback) getActivity()).onResult();
         }
 
 
@@ -328,6 +324,7 @@ public class MoviesFragment extends Fragment {
     }
 
     public interface Callback {
-        void onResult(int errCode);
+        void onResult();
+        void onItemClick(MovieInfo movieInfo);
     }
 }

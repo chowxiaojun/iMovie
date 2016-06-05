@@ -83,8 +83,9 @@ public class DetailFragment extends Fragment {
         });
 
         Intent intent = getActivity().getIntent();
-        if (intent != null && intent.getParcelableExtra("data") != null) {
-            movieInfo = intent.getParcelableExtra("data");
+        Bundle args = getArguments();
+        if (args != null && args.getParcelable(DETAIL_DATA) != null) {
+            movieInfo = args.getParcelable(DETAIL_DATA);
             // SUGGESTION:
             // Since from your codes, I can see that you are a really advanced student, in order to
             // learn more, you could also check a package called "butterknife". In the future, you
