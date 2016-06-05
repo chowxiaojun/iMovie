@@ -20,6 +20,7 @@ import com.xiroid.imovie.R;
 import com.xiroid.imovie.SimpleImageView;
 import com.xiroid.imovie.data.MovieContract;
 import com.xiroid.imovie.model.MovieInfo;
+import com.xiroid.imovie.model.Review;
 import com.xiroid.imovie.model.VideoInfo;
 
 import org.json.JSONArray;
@@ -47,6 +48,7 @@ public class DetailFragment extends Fragment {
 
     private MovieInfo movieInfo;
     private List<VideoInfo> videoInfos;
+    private List<Review> reviews;
 
     public DetailFragment() {
     }
@@ -128,6 +130,7 @@ public class DetailFragment extends Fragment {
                     overview.setText(movieInfo.getOverview());
                 }
                 new FetchTrailersTask().execute(Integer.toString(movieInfo.getId()));
+                new FetchReviewsTask().execute(Integer.toString(movieInfo.getId()));
             }
         }
         return rootView;
@@ -201,9 +204,10 @@ public class DetailFragment extends Fragment {
             if (videoInfos != null && videoInfos.size() > 0 && getView() != null) {
                 LinearLayout container = (LinearLayout) getView()
                         .findViewById(R.id.trailers_container);
+                container.setVisibility(View.VISIBLE);
                 for (VideoInfo videoInfo : videoInfos) {
                     LinearLayout itemRoot = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
-                            R.layout.layout_trailer_item, null, false);
+                            R.layout.trailer_item, null, false);
                     TextView nameTxt = (TextView) itemRoot.findViewById(R.id.txt_name);
                     nameTxt.setText(videoInfo.getName());
                     itemRoot.setTag(videoInfo);
@@ -257,6 +261,126 @@ public class DetailFragment extends Fragment {
             }
 
             return videoInfo;
+        }
+    }
+
+    class FetchReviewsTask extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... params) {
+            if (!TextUtils.isEmpty(params[0])) {
+                getReviews(params[0]);
+            }
+            return null;
+        }
+
+        /**
+         * 获取预览片信息
+         */
+        private void getReviews(String movieId) {
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+            String moviesStr = null;
+            try {
+                // /movie/{id}/reviews
+                final String MOVIES_BASE_URL = "http://api.themoviedb.org/3/movie/" + movieId + "/reviews";
+                final String APIKEY_PARAM = "api_key";
+                Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
+                        .appendQueryParameter(APIKEY_PARAM, BuildConfig.THE_MOVIE_API_KEY)
+                        .build();
+                URL url = new URL(builtUri.toString());
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+                urlConnection.connect();
+
+                // Read the input stream into a String
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuilder buffer = new StringBuilder();
+                if (inputStream == null) {
+                    return;
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line).append("\n");
+                }
+
+                if (buffer.length() >= 0) {
+                    moviesStr = buffer.toString();
+                }
+
+            } catch (IOException e) {
+                return;
+            }
+            if (!TextUtils.isEmpty(moviesStr)) {
+                try {
+                    JSONObject jsonObject = new JSONObject(moviesStr);
+                    JSONArray jsonArray = jsonObject.getJSONArray("results");
+                    reviews = parseData(jsonArray);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            if (reviews != null && reviews.size() > 0 && getView() != null) {
+                LinearLayout container = (LinearLayout) getView()
+                        .findViewById(R.id.review_container);
+                container.setVisibility(View.VISIBLE);
+                for (Review review : reviews) {
+                    LinearLayout itemRoot = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
+                            R.layout.review_item, null, false);
+                    TextView authorTxt = (TextView) itemRoot.findViewById(R.id.txt_author);
+                    TextView contentTxt = (TextView) itemRoot.findViewById(R.id.txt_content);
+                    authorTxt.setText(review.getAuthor());
+                    contentTxt.setText(review.getContent());
+                    container.addView(itemRoot);
+                }
+            }
+
+        }
+
+        /**
+         * 解析JSON数据
+         *
+         * @param data json data
+         * @return a List of review
+         */
+        private ArrayList<Review> parseData(JSONArray data) {
+            ArrayList<Review> reviews = new ArrayList<>();
+            if (data != null) {
+                for (int i = 0; i < data.length(); i++) {
+                    try {
+                        JSONObject item = (JSONObject) data.get(i);
+                        reviews.add(parseReview(item));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return reviews;
+        }
+
+        private Review parseReview(JSONObject item) {
+            Review review = new Review();
+            if (item != null) {
+                try {
+                    review.setId(item.getString("id"));
+                    review.setAuthor(item.getString("author"));
+                    review.setContent(item.getString("content"));
+                    review.setUrl(item.getString("url"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return review;
         }
     }
 }

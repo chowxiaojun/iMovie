@@ -27,8 +27,10 @@
     <string name="txt_overview_placeholder">overview</string>
     <string name="txt_release_placeholder">2015</string>
     <string name="txt_trailers_title">Trailers:</string>
-    <string name="txt_trailer_one">trailer 1</string>
-    <string name="txt_trailer_two">trailer 2</string>
+    <string name="txt_reviews_title">Reviews:</string>
+    <string name="txt_trailer">trailer</string>
+    <string name="txt_author_placeholder">author</string>
+    <string name="txt_content_placeholder">contentcontentcontentcontentcontentcontentcontentcontent</string>
     <string name="btn_favorite_content_description">make as favorite</string>
     <string name="btn_play_content_description">play</string>
 </resources>
