@@ -18,7 +18,8 @@
     <string name="pref_sort_favorite">favorite</string>
 
     <string name="txt_main_loading">loading...</string>
-    <string name="txt_main_err">Network Error</string>
+    <string name="txt_empty_network_err">Network Error</string>
+    <string name="txt_empty_no_favorites">No Favorites</string>
 
     <!-- Movie detail -->
     <string name="txt_title_placeholder">Movie Title</string>

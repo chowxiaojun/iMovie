@@ -237,9 +237,26 @@ public class MoviesFragment extends Fragment {
             if (movieInfos != null) {
                 mImageAdapter.add(movieInfos);
             }
+            updateEmptyView();
             ((Callback) getActivity()).onResult();
         }
 
+        private void updateEmptyView() {
+            if (mImageAdapter.getCount() <= 0) {
+                if (getView() != null) {
+                    int message = R.string.txt_empty_network_err;
+                    SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                    String sortBy = sharedPref.getString(
+                            getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
+                    String favorite = getResources().getString(R.string.pref_sort_favorite);
+                    if (sortBy.equals(favorite)) {
+                        message = R.string.txt_empty_no_favorites;
+                    }
+                   TextView emptyTxt = (TextView) getView().findViewById(R.id.empty_view);
+                    emptyTxt.setText(getResources().getString(message));
+                }
+            }
+        }
 
         /**
          * 解析JSON数据

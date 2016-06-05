@@ -25,7 +25,6 @@
         android:layout_height="wrap_content"
         android:textSize="22sp"
         android:fontFamily="sans-serif-condensed"
-        android:text="@string/txt_main_err"
-        android:visibility="gone"/>
+        android:text="@string/txt_empty_network_err" />
 
 </LinearLayout>
