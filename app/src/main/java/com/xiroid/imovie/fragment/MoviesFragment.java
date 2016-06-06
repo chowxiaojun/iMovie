@@ -241,6 +241,8 @@ public class MoviesFragment extends Fragment {
                 mImageAdapter.add(movieInfos);
                 if (movieInfos.size() > 0) {
                     ((Callback) getActivity()).initDetail(movieInfos.get(0));
+                } else {
+                    ((Callback) getActivity()).initDetail(null);
                 }
             }
             updateEmptyView();

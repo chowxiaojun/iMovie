@@ -70,20 +70,26 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
 
     @Override
     public void initDetail(MovieInfo movieInfo) {
-        if (mTwoPane && movieInfo != null) {
+        if (mTwoPane) {
             FrameLayout detailContainer = (FrameLayout) findViewById(R.id.movie_detail_container);
-            if (detailContainer != null) {
-                detailContainer.setVisibility(View.VISIBLE);
+            if (movieInfo != null) {
+                if (detailContainer != null) {
+                    detailContainer.setVisibility(View.VISIBLE);
+                }
+                Bundle arguments = new Bundle();
+                arguments.putParcelable(DetailFragment.DETAIL_DATA, movieInfo);
+
+                DetailFragment fragment =  new DetailFragment();
+                fragment.setArguments(arguments);
+
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.movie_detail_container, fragment)
+                        .commit();
+            } else {
+                if (detailContainer != null) {
+                    detailContainer.setVisibility(View.GONE);
+                }
             }
-            Bundle arguments = new Bundle();
-            arguments.putParcelable(DetailFragment.DETAIL_DATA, movieInfo);
-
-            DetailFragment fragment =  new DetailFragment();
-            fragment.setArguments(arguments);
-
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.movie_detail_container, fragment)
-                    .commit();
         }
     }
 
