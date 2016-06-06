@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -68,6 +69,25 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
     }
 
     @Override
+    public void initDetail(MovieInfo movieInfo) {
+        if (mTwoPane && movieInfo != null) {
+            FrameLayout detailContainer = (FrameLayout) findViewById(R.id.movie_detail_container);
+            if (detailContainer != null) {
+                detailContainer.setVisibility(View.VISIBLE);
+            }
+            Bundle arguments = new Bundle();
+            arguments.putParcelable(DetailFragment.DETAIL_DATA, movieInfo);
+
+            DetailFragment fragment =  new DetailFragment();
+            fragment.setArguments(arguments);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_container, fragment)
+                    .commit();
+        }
+    }
+
+    @Override
     public void onResult() {
         mLoadingView.setVisibility(View.GONE);
         mContentView.setVisibility(View.VISIBLE);
@@ -76,7 +96,15 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
     @Override
     public void onItemClick(MovieInfo movieInfo) {
         if (mTwoPane) {
+            Bundle arguments = new Bundle();
+            arguments.putParcelable(DetailFragment.DETAIL_DATA, movieInfo);
 
+            DetailFragment fragment =  new DetailFragment();
+            fragment.setArguments(arguments);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_container, fragment)
+                    .commit();
         } else {
             Intent intent = new Intent(MainActivity.this, DetailActivity.class);
             Log.d("MoviesFragment", movieInfo.toString());

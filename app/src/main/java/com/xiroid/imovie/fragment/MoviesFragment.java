@@ -204,12 +204,15 @@ public class MoviesFragment extends Fragment {
                     JSONObject jsonObject = new JSONObject(moviesStr);
                     JSONArray jsonArray = jsonObject.getJSONArray("results");
                     movieInfos = parseData(jsonArray);
-                    cursor = getContext().getContentResolver().query(MovieContract.FavoriteEntry.CONTENT_URI,
-                            FAVORITE_PROJECTION,
-                            null,
-                            null,
-                            null
-                    );
+                    if (getContext().getContentResolver() != null) {
+                        cursor = getContext().getContentResolver().query(MovieContract.FavoriteEntry.CONTENT_URI,
+                                FAVORITE_PROJECTION,
+                                null,
+                                null,
+                                null
+                        );
+                    }
+
                     if (cursor != null) {
                         for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                             int movieId = cursor.getInt(COL_FAVORITE_MOVIE_ID);
@@ -236,6 +239,9 @@ public class MoviesFragment extends Fragment {
             super.onPostExecute(result);
             if (movieInfos != null) {
                 mImageAdapter.add(movieInfos);
+                if (movieInfos.size() > 0) {
+                    ((Callback) getActivity()).initDetail(movieInfos.get(0));
+                }
             }
             updateEmptyView();
             ((Callback) getActivity()).onResult();
@@ -341,6 +347,7 @@ public class MoviesFragment extends Fragment {
     }
 
     public interface Callback {
+        void initDetail(MovieInfo movieInfo);
         void onResult();
         void onItemClick(MovieInfo movieInfo);
     }
