@@ -18,3 +18,6 @@ Udacity《Developing Android Apps》课程的课程项目作业，在这个项�
 2. [Stetho](http://facebook.github.io/stetho/)：可通过Chrome桌面浏览器调试Android应用
 3. [CircularProgressView](https://github.com/rahatarmanahmed/CircularProgressView)
 
+推荐学习资源：
+1. [Google I/O 2010 - Android REST client applications](https://www.youtube.com/watch?v=xHXn3Kg2IQE)
+2. [Google IO Rest design pattern, Finished ContentProvider and stuck now](http://stackoverflow.com/questions/9112658/google-io-rest-design-pattern-finished-contentprovider-and-stuck-now)
