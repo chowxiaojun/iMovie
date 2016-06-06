@@ -45,10 +45,13 @@ import java.util.List;
  */
 public class MoviesFragment extends Fragment {
     private static final String TAG = MoviesFragment.class.getSimpleName();
+    private static final String SELECT_KEY = "select_key";
+    private static final String MOVIE_LIST = "movie_list";
 
     private GridView mGridView;
     private ImageAdapter mImageAdapter;
-    private List<MovieInfo> movieInfos;
+    private ArrayList<MovieInfo> movieInfos;
+    private int mPosition = GridView.INVALID_POSITION;
 
     private static final String[] FAVORITE_PROJECTION = {
             MovieContract.FavoriteEntry.COLUMN_MOVIE_ID,
@@ -84,8 +87,17 @@ public class MoviesFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MovieInfo movieInfo = (MovieInfo) mImageAdapter.getItem(position);
                 ((MainActivity) getActivity()).onItemClick(movieInfo);
+                mPosition = position;
             }
         });
+
+        if (savedInstanceState != null
+                && savedInstanceState.containsKey(SELECT_KEY)
+                && savedInstanceState.containsKey(MOVIE_LIST)) {
+            mPosition = savedInstanceState.getInt(SELECT_KEY, GridView.INVALID_POSITION);
+            movieInfos = savedInstanceState.getParcelableArrayList(MOVIE_LIST);
+        }
+
         return rootView;
     }
 
@@ -97,7 +109,27 @@ public class MoviesFragment extends Fragment {
     }
 
     private void loadMovies() {
-        new FetchMoviesTask().execute();
+        if (mPosition == GridView.INVALID_POSITION || movieInfos == null) {
+            new FetchMoviesTask().execute();
+        } else {
+            mImageAdapter.add(movieInfos);
+            if (movieInfos.size() > 0) {
+                ((Callback) getActivity()).initDetail(movieInfos.get(mPosition));
+            } else {
+                ((Callback) getActivity()).initDetail(null);
+            }
+            mGridView.smoothScrollToPosition(mPosition);
+            ((Callback) getActivity()).onResult();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if (mPosition != GridView.INVALID_POSITION) {
+            outState.putInt(SELECT_KEY, mPosition);
+            outState.putParcelableArrayList(MOVIE_LIST, movieInfos);
+        }
+        super.onSaveInstanceState(outState);
     }
 
     // SUGGESTION:
