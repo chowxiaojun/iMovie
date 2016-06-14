@@ -14,9 +14,11 @@ Udacity《Developing Android Apps》课程的课程项目作业，在这个项�
 
 使用的第三方开源库：
 
-1. [picasso](http://square.github.io/picasso/)
-2. [Stetho](http://facebook.github.io/stetho/)：可通过Chrome桌面浏览器调试Android应用
-3. [CircularProgressView](https://github.com/rahatarmanahmed/CircularProgressView)
+1. [picasso](http://square.github.io/picasso/)：图片下载缓存库。应用中
+2. [Stetho](http://facebook.github.io/stetho/)：可通过Chrome桌面浏览器调试Android应用，待应用
+3. [CircularProgressView](https://github.com/rahatarmanahmed/CircularProgressView)：应用中
+4. [retrofit](http://square.github.io/retrofit/)：是一个Square开发的类型安全的REST安卓客户端请求库。待应用
+5. [butterknife](http://jakewharton.github.io/butterknife/)：View注入框架。待应用
 
 推荐学习资源：
 
