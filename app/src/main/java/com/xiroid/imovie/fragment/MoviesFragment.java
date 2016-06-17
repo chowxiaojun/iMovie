@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -24,8 +24,10 @@ import com.xiroid.imovie.BuildConfig;
 import com.xiroid.imovie.R;
 import com.xiroid.imovie.SimpleImageView;
 import com.xiroid.imovie.activity.MainActivity;
+import com.xiroid.imovie.api.MovieService;
 import com.xiroid.imovie.data.MovieContract;
 import com.xiroid.imovie.model.MovieInfo;
+import com.xiroid.imovie.model.MoviesResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,6 +41,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -105,14 +112,38 @@ public class MoviesFragment extends Fragment {
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart");
-        loadMovies();
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String sortBy = sharedPref.getString(
+                getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl(MovieService.BASE_URL)
+                .build();
+
+        MovieService service = retrofit.create(MovieService.class);
+        Call<MoviesResult> call = service.getMovies(sortBy, BuildConfig.THE_MOVIE_API_KEY);
+        call.enqueue(new retrofit2.Callback<MoviesResult>() {
+            @Override
+            public void onResponse(Call<MoviesResult> call, Response<MoviesResult> response) {
+                if (response.isSuccessful()) {
+                    MoviesResult result = response.body();
+                    List<MoviesResult.Movie> movies = result.getResults();
+                    mImageAdapter.add(movies);
+                    ((Callback) getActivity()).onResult();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MoviesResult> call, Throwable t) {
+
+            }
+        });
     }
 
     private void loadMovies() {
         if (mPosition == GridView.INVALID_POSITION || movieInfos == null) {
-            new FetchMoviesTask().execute();
         } else {
-            mImageAdapter.add(movieInfos);
             if (movieInfos.size() > 0) {
                 ((Callback) getActivity()).initDetail(movieInfos.get(mPosition));
             } else {
@@ -270,7 +301,6 @@ public class MoviesFragment extends Fragment {
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
             if (movieInfos != null) {
-                mImageAdapter.add(movieInfos);
                 if (movieInfos.size() > 0) {
                     ((Callback) getActivity()).initDetail(movieInfos.get(0));
                 } else {
@@ -341,19 +371,19 @@ public class MoviesFragment extends Fragment {
 
     class ImageAdapter extends BaseAdapter {
         private Context mContext;
-        private List<MovieInfo> movieInfos = new ArrayList<MovieInfo>();
+        private List<MoviesResult.Movie> movies = new ArrayList<>();
 
         public ImageAdapter(Context c) {
             mContext = c;
         }
 
-        public void add(List<MovieInfo> movieInfos) {
-            this.movieInfos = movieInfos;
+        public void add(List<MoviesResult.Movie> movies) {
+            this.movies = movies;
             notifyDataSetChanged();
         }
 
         public int getCount() {
-            return movieInfos.size();
+            return movies.size();
         }
 
         public Object getItem(int position) {
@@ -365,18 +395,20 @@ public class MoviesFragment extends Fragment {
         }
 
         public View getView(int position, View convertView, ViewGroup parent) {
-            SimpleImageView imageView;
+            LinearLayout container;
             if (convertView == null) {
-                imageView = new SimpleImageView(mContext);
-                imageView.setLayoutParams(new GridView.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+                container = (LinearLayout) LayoutInflater.from(mContext).inflate(R.layout.grid_movies_item, null, false);
+
             } else {
-                imageView = (SimpleImageView) convertView;
+                container = (LinearLayout) convertView;
             }
 
-            Picasso.with(mContext).load(movieInfos.get(position).getPoster()).into(imageView);
-            return imageView;
+            SimpleImageView imageView = (SimpleImageView) container.findViewById(R.id.iv_poster);
+            Picasso.with(mContext).load(movies.get(position).getPoster()).into(imageView);
+            TextView textView = (TextView) container.findViewById(R.id.txt_title);
+            textView.setText(movies.get(position).getTitle());
+
+            return container;
         }
     }
 

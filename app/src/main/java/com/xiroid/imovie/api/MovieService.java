@@ -1,15 +1,19 @@
 package com.xiroid.imovie.api;
 
-import com.xiroid.imovie.model.Movies;
+import com.xiroid.imovie.model.MoviesResult;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * @author xiaojunzhou
  * @date 16/6/14
  */
 public interface MovieService {
-    @GET("")
-    Call<Movies> getMovies();
+    public static final String BASE_URL = "http://api.themoviedb.org/";
+
+    @GET("/3/movie/{sortBy}")
+    Call<MoviesResult> getMovies(@Path("sortBy") String sortBy, @Query("api_key") String apiKey);
 }
