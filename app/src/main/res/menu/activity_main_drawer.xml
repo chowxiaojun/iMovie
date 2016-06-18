@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group
+        android:id="@+id/movie_category"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_upcoming"
+            android:title="@string/pref_sort_label_upcoming" />
+        <item
+            android:id="@+id/nav_now_playing"
+            android:title="@string/pref_sort_label_now_playing" />
+        <item
+            android:id="@+id/nav_popular"
+            android:title="@string/pref_sort_label_popular" />
+        <item
+            android:id="@+id/nav_top_rated"
+            android:title="@string/pref_sort_label_top_rated" />
+        <item
+            android:id="@+id/nav_favorite"
+            android:title="@string/pref_sort_label_favorite" />
+    </group>
+
+    <group
+        android:id="@+id/setting">
+        <item
+            android:id="@+id/nav_share"
+            android:title="Share" />
+        <item
+            android:id="@+id/nav_send"
+            android:title="About" />
+    </group>
+
+</menu>

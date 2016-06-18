@@ -23,7 +23,7 @@ import com.squareup.picasso.Picasso;
 import com.xiroid.imovie.BuildConfig;
 import com.xiroid.imovie.R;
 import com.xiroid.imovie.SimpleImageView;
-import com.xiroid.imovie.activity.MainActivity;
+import com.xiroid.imovie.activity.MoviesActivity;
 import com.xiroid.imovie.api.MovieService;
 import com.xiroid.imovie.data.MovieContract;
 import com.xiroid.imovie.model.MovieInfo;
@@ -93,7 +93,7 @@ public class MoviesFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MovieInfo movieInfo = (MovieInfo) mImageAdapter.getItem(position);
-                ((MainActivity) getActivity()).onItemClick(movieInfo);
+                ((MoviesActivity) getActivity()).onItemClick(movieInfo);
                 mPosition = position;
             }
         });
@@ -131,6 +131,8 @@ public class MoviesFragment extends Fragment {
                     List<MoviesResult.Movie> movies = result.getResults();
                     mImageAdapter.add(movies);
                     ((Callback) getActivity()).onResult();
+                } else {
+
                 }
             }
 
@@ -406,7 +408,7 @@ public class MoviesFragment extends Fragment {
             SimpleImageView imageView = (SimpleImageView) container.findViewById(R.id.iv_poster);
             Picasso.with(mContext).load(movies.get(position).getPoster()).into(imageView);
             TextView textView = (TextView) container.findViewById(R.id.txt_title);
-            textView.setText(movies.get(position).getTitle());
+            textView.setText(movies.get(position).getOriginal_title());
 
             return container;
         }
