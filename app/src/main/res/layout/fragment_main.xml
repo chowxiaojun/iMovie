@@ -7,24 +7,53 @@
     tools:context=".fragment.MoviesFragment"
     tools:showIn="@layout/activity_main">
 
-    <GridView
-        android:id="@+id/movies_gridview"
+    <LinearLayout
+        android:id="@+id/progress_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="auto_fit"
-        android:verticalSpacing="0dp"
-        android:horizontalSpacing="0dp"
-        android:stretchMode="columnWidth"
+        android:orientation="vertical"
         android:gravity="center">
+        <com.github.rahatarmanahmed.cpv.CircularProgressView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:cpv_color="#3c98fc"
+            app:cpv_animAutostart="true"
+            app:cpv_indeterminate="true" />
 
-    </GridView>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:text="@string/txt_main_loading"/>
+    </LinearLayout>
 
-    <TextView
-        android:id="@+id/empty_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="22sp"
-        android:fontFamily="sans-serif-condensed"
-        android:text="@string/txt_empty_network_err" />
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+        <GridView
+            android:id="@+id/movies_gridView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:numColumns="auto_fit"
+            android:verticalSpacing="0dp"
+            android:horizontalSpacing="0dp"
+            android:stretchMode="columnWidth"
+            android:gravity="center">
+
+        </GridView>
+
+        <TextView
+            android:id="@+id/empty_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif-condensed"
+            android:text="@string/txt_empty_network_err" />
+    </LinearLayout>
+
 
 </LinearLayout>

@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -19,9 +18,9 @@ import com.xiroid.imovie.BuildConfig;
 import com.xiroid.imovie.R;
 import com.xiroid.imovie.SimpleImageView;
 import com.xiroid.imovie.data.MovieContract;
-import com.xiroid.imovie.model.MovieInfo;
-import com.xiroid.imovie.model.Review;
-import com.xiroid.imovie.model.VideoInfo;
+import com.xiroid.imovie.model.Movies;
+import com.xiroid.imovie.model.Reviews;
+import com.xiroid.imovie.model.Trailers;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,7 +32,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,9 +44,9 @@ public class DetailFragment extends Fragment {
 
     private ImageButton mFavoriteBtn;
 
-    private MovieInfo movieInfo;
-    private List<VideoInfo> videoInfos;
-    private List<Review> reviews;
+    private Movies.Movie movie;
+    private List<Trailers.Trailer> videoInfos;
+    private List<Reviews.Review> reviews;
 
     public DetailFragment() {
     }
@@ -61,24 +59,24 @@ public class DetailFragment extends Fragment {
         mFavoriteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (movieInfo.getFavorite() == 0) {
-                    movieInfo.setFavorite(1);
+                if (movie.getFavorite() == 0) {
+                    movie.setFavorite(1);
                     mFavoriteBtn.setImageResource(R.drawable.ic_favorite_black);
                     ContentValues values = new ContentValues();
-                    values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_ID, movieInfo.getId());
-                    values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_OVERVIEW, movieInfo.getOverview());
-                    values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_POSTER, movieInfo.getPosterPath());
-                    values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_RELEASE_DATE, movieInfo.getReleaseDate());
-                    values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_TITLE, movieInfo.getOriginalTitle());
-                    values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_VOTE_AVERAGE, movieInfo.getVoteAverage());
+                    values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_ID, movie.getId());
+                    values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_OVERVIEW, movie.getOverview());
+                    values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_POSTER, movie.getPoster_path());
+                    values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_RELEASE_DATE, movie.getRelease_date());
+                    values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_TITLE, movie.getOriginal_title());
+                    values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_VOTE_AVERAGE, movie.getVote_average());
                     getContext().getContentResolver().insert(MovieContract.FavoriteEntry.CONTENT_URI, values);
                 } else {
-                    movieInfo.setFavorite(0);
+                    movie.setFavorite(0);
                     mFavoriteBtn.setImageResource(R.drawable.ic_favorite_border_black);
                     getContext().getContentResolver().delete(
                             MovieContract.FavoriteEntry.CONTENT_URI,
                             MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + " = ?",
-                            new String[]{Integer.toString(movieInfo.getId())}
+                            new String[]{Integer.toString(movie.getId())}
                     );
                 }
             }
@@ -87,7 +85,7 @@ public class DetailFragment extends Fragment {
         Intent intent = getActivity().getIntent();
         Bundle args = getArguments();
         if (args != null && args.getParcelable(DETAIL_DATA) != null) {
-            movieInfo = args.getParcelable(DETAIL_DATA);
+            movie = args.getParcelable(DETAIL_DATA);
             // SUGGESTION:
             // Since from your codes, I can see that you are a really advanced student, in order to
             // learn more, you could also check a package called "butterknife". In the future, you
@@ -103,34 +101,32 @@ public class DetailFragment extends Fragment {
             TextView releaseDate = (TextView) rootView.findViewById(R.id.txt_releaseDate);
             TextView overview = (TextView) rootView.findViewById(R.id.txt_overview);
 
-            if (movieInfo != null) {
+            if (movie != null) {
 
-                if (movieInfo.getFavorite() == 1) {
+                if (movie.getFavorite() == 1) {
                     mFavoriteBtn.setImageResource(R.drawable.ic_favorite_black);
                 }
 
                 if (title != null) {
-                    title.setText(movieInfo.getOriginalTitle());
+                    title.setText(movie.getOriginal_title());
                 }
 
                 Picasso.with(getActivity())
-                        .load(movieInfo.getPoster())
+                        .load(movie.getPoster())
                         .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
                         .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
                         .into(poster);
                 if (releaseDate != null) {
-                    releaseDate.setText(movieInfo.getReleaseDate().split("-")[0]);
+                    releaseDate.setText(movie.getRelease_date().split("-")[0]);
                 }
 
                 if (rating != null) {
-                    rating.setText(getString(R.string.txt_rating_format, Double.toString(movieInfo.getVoteAverage())));
+                    rating.setText(getString(R.string.txt_rating_format, Double.toString(movie.getVote_average())));
                 }
 
                 if (overview != null) {
-                    overview.setText(movieInfo.getOverview());
+                    overview.setText(movie.getOverview());
                 }
-                new FetchTrailersTask().execute(Integer.toString(movieInfo.getId()));
-                new FetchReviewsTask().execute(Integer.toString(movieInfo.getId()));
             }
         }
         return rootView;
@@ -191,7 +187,6 @@ public class DetailFragment extends Fragment {
                 try {
                     JSONObject jsonObject = new JSONObject(moviesStr);
                     JSONArray jsonArray = jsonObject.getJSONArray("results");
-                    videoInfos = parseData(jsonArray);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -201,68 +196,9 @@ public class DetailFragment extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-            if (videoInfos != null && videoInfos.size() > 0 && getView() != null) {
-                LinearLayout container = (LinearLayout) getView()
-                        .findViewById(R.id.trailers_container);
-                container.setVisibility(View.VISIBLE);
-                for (VideoInfo videoInfo : videoInfos) {
-                    LinearLayout itemRoot = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
-                            R.layout.trailer_item, null, false);
-                    TextView nameTxt = (TextView) itemRoot.findViewById(R.id.txt_name);
-                    nameTxt.setText(videoInfo.getName());
-                    itemRoot.setTag(videoInfo);
-                    itemRoot.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            VideoInfo info = (VideoInfo) v.getTag();
-                            String url = info.getUrl();
-                            Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setData(Uri.parse(info.getUrl()));
-                            startActivity(intent);
-                        }
-                    });
-                    container.addView(itemRoot);
-                }
-            }
-        }
-
-        /**
-         * 解析JSON数据
-         *
-         * @param data json data
-         * @return a List of VideoInfo
-         */
-        private ArrayList<VideoInfo> parseData(JSONArray data) {
-            ArrayList<VideoInfo> infos = new ArrayList<>();
-            if (data != null) {
-                for (int i = 0; i < data.length(); i++) {
-                    try {
-                        JSONObject item = (JSONObject) data.get(i);
-                        infos.add(parseVideoInfo(item));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            return infos;
-        }
-
-        private VideoInfo parseVideoInfo(JSONObject item) {
-            VideoInfo videoInfo = new VideoInfo();
-            if (item != null) {
-                try {
-                    videoInfo.setId(item.getString("id"));
-                    videoInfo.setName(item.getString("name"));
-                    videoInfo.setKey(item.getString("key"));
-                    videoInfo.setType(item.getString("type"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            return videoInfo;
         }
     }
+
 
     class FetchReviewsTask extends AsyncTask<String, Void, Void> {
 
@@ -319,7 +255,6 @@ public class DetailFragment extends Fragment {
                 try {
                     JSONObject jsonObject = new JSONObject(moviesStr);
                     JSONArray jsonArray = jsonObject.getJSONArray("results");
-                    reviews = parseData(jsonArray);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -330,57 +265,8 @@ public class DetailFragment extends Fragment {
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
             if (reviews != null && reviews.size() > 0 && getView() != null) {
-                LinearLayout container = (LinearLayout) getView()
-                        .findViewById(R.id.review_container);
-                container.setVisibility(View.VISIBLE);
-                for (Review review : reviews) {
-                    LinearLayout itemRoot = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
-                            R.layout.review_item, null, false);
-                    TextView authorTxt = (TextView) itemRoot.findViewById(R.id.txt_author);
-                    TextView contentTxt = (TextView) itemRoot.findViewById(R.id.txt_content);
-                    authorTxt.setText(review.getAuthor());
-                    contentTxt.setText(review.getContent());
-                    container.addView(itemRoot);
-                }
             }
 
-        }
-
-        /**
-         * 解析JSON数据
-         *
-         * @param data json data
-         * @return a List of review
-         */
-        private ArrayList<Review> parseData(JSONArray data) {
-            ArrayList<Review> reviews = new ArrayList<>();
-            if (data != null) {
-                for (int i = 0; i < data.length(); i++) {
-                    try {
-                        JSONObject item = (JSONObject) data.get(i);
-                        reviews.add(parseReview(item));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            return reviews;
-        }
-
-        private Review parseReview(JSONObject item) {
-            Review review = new Review();
-            if (item != null) {
-                try {
-                    review.setId(item.getString("id"));
-                    review.setAuthor(item.getString("author"));
-                    review.setContent(item.getString("content"));
-                    review.setUrl(item.getString("url"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            return review;
         }
     }
 }

@@ -24,7 +24,7 @@ public class Trailers {
      * type : Trailer
      */
 
-    private List<ResultsBean> results;
+    private List<Trailer> results;
 
     public int getId() {
         return id;
@@ -34,15 +34,15 @@ public class Trailers {
         this.id = id;
     }
 
-    public List<ResultsBean> getResults() {
+    public List<Trailer> getResults() {
         return results;
     }
 
-    public void setResults(List<ResultsBean> results) {
+    public void setResults(List<Trailer> results) {
         this.results = results;
     }
 
-    public static class ResultsBean {
+    public static class Trailer {
         private String id;
         private String iso_639_1;
         private String iso_3166_1;

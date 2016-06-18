@@ -3,12 +3,9 @@ package com.xiroid.imovie.fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,22 +20,10 @@ import com.squareup.picasso.Picasso;
 import com.xiroid.imovie.BuildConfig;
 import com.xiroid.imovie.R;
 import com.xiroid.imovie.SimpleImageView;
-import com.xiroid.imovie.activity.MoviesActivity;
 import com.xiroid.imovie.api.MovieService;
 import com.xiroid.imovie.data.MovieContract;
-import com.xiroid.imovie.model.MovieInfo;
-import com.xiroid.imovie.model.MoviesResult;
+import com.xiroid.imovie.model.Movies;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +42,7 @@ public class MoviesFragment extends Fragment {
 
     private GridView mGridView;
     private ImageAdapter mImageAdapter;
-    private ArrayList<MovieInfo> movieInfos;
+    private ArrayList<Movies.Movie> movies;
     private int mPosition = GridView.INVALID_POSITION;
 
     private static final String[] FAVORITE_PROJECTION = {
@@ -84,7 +69,7 @@ public class MoviesFragment extends Fragment {
                              Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        mGridView = (GridView) rootView.findViewById(R.id.movies_gridview);
+        mGridView = (GridView) rootView.findViewById(R.id.movies_gridView);
         TextView textView = (TextView) rootView.findViewById(R.id.empty_view);
         mGridView.setEmptyView(textView);
         mImageAdapter = new ImageAdapter(getActivity());
@@ -92,8 +77,7 @@ public class MoviesFragment extends Fragment {
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                MovieInfo movieInfo = (MovieInfo) mImageAdapter.getItem(position);
-                ((MoviesActivity) getActivity()).onItemClick(movieInfo);
+                Movies.Movie movie = (Movies.Movie) mImageAdapter.getItem(position);
                 mPosition = position;
             }
         });
@@ -102,7 +86,7 @@ public class MoviesFragment extends Fragment {
                 && savedInstanceState.containsKey(SELECT_KEY)
                 && savedInstanceState.containsKey(MOVIE_LIST)) {
             mPosition = savedInstanceState.getInt(SELECT_KEY, GridView.INVALID_POSITION);
-            movieInfos = savedInstanceState.getParcelableArrayList(MOVIE_LIST);
+            movies = savedInstanceState.getParcelableArrayList(MOVIE_LIST);
         }
 
         return rootView;
@@ -122,37 +106,43 @@ public class MoviesFragment extends Fragment {
                 .build();
 
         MovieService service = retrofit.create(MovieService.class);
-        Call<MoviesResult> call = service.getMovies(sortBy, BuildConfig.THE_MOVIE_API_KEY);
-        call.enqueue(new retrofit2.Callback<MoviesResult>() {
+        Call<Movies> call = service.getMovies(sortBy, BuildConfig.THE_MOVIE_API_KEY, null);
+        call.enqueue(new retrofit2.Callback<Movies>() {
             @Override
-            public void onResponse(Call<MoviesResult> call, Response<MoviesResult> response) {
+            public void onResponse(Call<Movies> call, Response<Movies> response) {
                 if (response.isSuccessful()) {
-                    MoviesResult result = response.body();
-                    List<MoviesResult.Movie> movies = result.getResults();
-                    mImageAdapter.add(movies);
-                    ((Callback) getActivity()).onResult();
+                    Movies result = response.body();
+                    movies = (ArrayList<Movies.Movie>) result.getResults();
+                    updateView();
                 } else {
 
                 }
             }
 
             @Override
-            public void onFailure(Call<MoviesResult> call, Throwable t) {
+            public void onFailure(Call<Movies> call, Throwable t) {
 
             }
         });
     }
 
+    private void updateView() {
+        if (movies != null) {
+            mImageAdapter.add(movies);
+        }
+        if (getView() != null) {
+            LinearLayout progress = (LinearLayout) getView().findViewById(R.id.progress_view);
+            LinearLayout content = (LinearLayout) getView().findViewById(R.id.content);
+            progress.setVisibility(View.GONE);
+            content.setVisibility(View.VISIBLE);
+        }
+
+    }
+
     private void loadMovies() {
-        if (mPosition == GridView.INVALID_POSITION || movieInfos == null) {
+        if (mPosition == GridView.INVALID_POSITION || movies == null) {
         } else {
-            if (movieInfos.size() > 0) {
-                ((Callback) getActivity()).initDetail(movieInfos.get(mPosition));
-            } else {
-                ((Callback) getActivity()).initDetail(null);
-            }
             mGridView.smoothScrollToPosition(mPosition);
-            ((Callback) getActivity()).onResult();
         }
     }
 
@@ -160,226 +150,51 @@ public class MoviesFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         if (mPosition != GridView.INVALID_POSITION) {
             outState.putInt(SELECT_KEY, mPosition);
-            outState.putParcelableArrayList(MOVIE_LIST, movieInfos);
+            outState.putParcelableArrayList(MOVIE_LIST, movies);
         }
         super.onSaveInstanceState(outState);
     }
 
-    // SUGGESTION:
-    // In order to make your codes reusable and structural, you can consider to refactor your codes
-    // and put this class in a separate Java file.
-
-    // To learn more, you can also try to use Retrofit library in your future projects to handle
-    // fetching data using third party API and network operations. It can make your life easier.
-    // Ref: http://square.github.io/retrofit/
-    class FetchMoviesTask extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String sortBy = sharedPref.getString(
-                    getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
-            String favorite = getResources().getString(R.string.pref_sort_favorite);
-            if (sortBy.equals(favorite)) {
-                getFavoritesFromDb();
-            } else {
-                getMoviesFromNetwork(sortBy);
-            }
-
-            return null;
-        }
-
-        private void getFavoritesFromDb() {
-            Cursor cursor = null;
-            try {
-                cursor = getContext().getContentResolver().query(MovieContract.FavoriteEntry.CONTENT_URI,
-                        FAVORITE_PROJECTION,
-                        null,
-                        null,
-                        null
-                );
-                if (cursor != null) {
-                    movieInfos = new ArrayList<>();
-                    for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                        int movieId = cursor.getInt(COL_FAVORITE_MOVIE_ID);
-                        MovieInfo movieInfo = new MovieInfo();
-                        movieInfo.setFavorite(1);
-                        movieInfo.setId(cursor.getInt(COL_FAVORITE_MOVIE_ID));
-                        movieInfo.setOriginalTitle(cursor.getString(COL_FAVORITE_MOVIE_TITLE));
-                        movieInfo.setOverview(cursor.getString(COL_FAVORITE_MOVIE_OVERVIEW));
-                        movieInfo.setReleaseDate(cursor.getString(COL_FAVORITE_MOVIE_RELEASE_DATE));
-                        movieInfo.setPosterPath(cursor.getString(COL_FAVORITE_MOVIE_POSTER));
-                        movieInfo.setVoteAverage(cursor.getDouble(COL_FAVORITE_MOVIE_VOTE_AVERAGE));
-                        movieInfos.add(movieInfo);
-                    }
-                }
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
+    private void getFavoritesFromDb() {
+        Cursor cursor = null;
+        try {
+            cursor = getContext().getContentResolver().query(MovieContract.FavoriteEntry.CONTENT_URI,
+                    FAVORITE_PROJECTION,
+                    null,
+                    null,
+                    null
+            );
+            if (cursor != null) {
+                movies = new ArrayList<>();
+                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                    int movieId = cursor.getInt(COL_FAVORITE_MOVIE_ID);
+                    Movies.Movie movieInfo = new Movies.Movie();
+                    movieInfo.setFavorite(1);
+                    movieInfo.setId(cursor.getInt(COL_FAVORITE_MOVIE_ID));
+                    movieInfo.setOriginal_title(cursor.getString(COL_FAVORITE_MOVIE_TITLE));
+                    movieInfo.setOverview(cursor.getString(COL_FAVORITE_MOVIE_OVERVIEW));
+                    movieInfo.setRelease_date(cursor.getString(COL_FAVORITE_MOVIE_RELEASE_DATE));
+                    movieInfo.setPoster_path(cursor.getString(COL_FAVORITE_MOVIE_POSTER));
+                    movieInfo.setVote_average(cursor.getDouble(COL_FAVORITE_MOVIE_VOTE_AVERAGE));
+                    movies.add(movieInfo);
                 }
             }
-        }
-
-        /**
-         * 从网络上获取数据
-         *
-         * @param sortBy
-         */
-        private void getMoviesFromNetwork(String sortBy) {
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            String moviesStr = null;
-            try {
-                // /movie/top_rated
-                final String MOVIES_BASE_URL = "http://api.themoviedb.org/3/movie/" + sortBy;
-                final String APIKEY_PARAM = "api_key";
-                Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
-                        .appendQueryParameter(APIKEY_PARAM, BuildConfig.THE_MOVIE_API_KEY)
-                        .build();
-                URL url = new URL(builtUri.toString());
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.setRequestProperty("Accept", "application/json");
-
-                urlConnection.connect();
-
-                // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuilder buffer = new StringBuilder();
-                if (inputStream == null) {
-                    return;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line).append("\n");
-                }
-
-                if (buffer.length() >= 0) {
-                    moviesStr = buffer.toString();
-                }
-
-            } catch (IOException e) {
-                return;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
             }
-            if (!TextUtils.isEmpty(moviesStr)) {
-                Cursor cursor = null;
-                try {
-                    JSONObject jsonObject = new JSONObject(moviesStr);
-                    JSONArray jsonArray = jsonObject.getJSONArray("results");
-                    movieInfos = parseData(jsonArray);
-                    if (getContext().getContentResolver() != null) {
-                        cursor = getContext().getContentResolver().query(MovieContract.FavoriteEntry.CONTENT_URI,
-                                FAVORITE_PROJECTION,
-                                null,
-                                null,
-                                null
-                        );
-                    }
-
-                    if (cursor != null) {
-                        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                            int movieId = cursor.getInt(COL_FAVORITE_MOVIE_ID);
-                            for (MovieInfo item : movieInfos) {
-                                if (item.getId() == movieId) {
-                                    item.setFavorite(1);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } finally {
-                    if (cursor != null) {
-                        cursor.close();
-                    }
-                }
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            if (movieInfos != null) {
-                if (movieInfos.size() > 0) {
-                    ((Callback) getActivity()).initDetail(movieInfos.get(0));
-                } else {
-                    ((Callback) getActivity()).initDetail(null);
-                }
-            }
-            updateEmptyView();
-            ((Callback) getActivity()).onResult();
-        }
-
-        private void updateEmptyView() {
-            if (mImageAdapter.getCount() <= 0) {
-                if (getView() != null) {
-                    int message = R.string.txt_empty_network_err;
-                    SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                    String sortBy = sharedPref.getString(
-                            getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
-                    String favorite = getResources().getString(R.string.pref_sort_favorite);
-                    if (sortBy.equals(favorite)) {
-                        message = R.string.txt_empty_no_favorites;
-                    }
-                   TextView emptyTxt = (TextView) getView().findViewById(R.id.empty_view);
-                    emptyTxt.setText(getResources().getString(message));
-                }
-            }
-        }
-
-        /**
-         * 解析JSON数据
-         *
-         * @param data json data
-         * @return a List of MovieInfo
-         */
-        private ArrayList<MovieInfo> parseData(JSONArray data) {
-            ArrayList<MovieInfo> infos = new ArrayList<MovieInfo>();
-            if (data != null) {
-                for (int i = 0; i < data.length(); i++) {
-                    try {
-                        JSONObject item = (JSONObject) data.get(i);
-                        infos.add(parseMovieInfo(item));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            return infos;
-        }
-
-        private MovieInfo parseMovieInfo(JSONObject item) {
-            MovieInfo movieInfo = new MovieInfo();
-            if (item != null) {
-                try {
-                    // MovieInfo中的很多字段不一定有用，看需求
-                    movieInfo.setId(item.getInt("id"));
-                    movieInfo.setOriginalTitle(item.getString("original_title"));
-                    movieInfo.setPosterPath(item.getString("poster_path"));
-                    movieInfo.setOverview(item.getString("overview"));
-                    movieInfo.setVoteAverage(item.getDouble("vote_average"));
-                    movieInfo.setReleaseDate(item.getString("release_date"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            return movieInfo;
         }
     }
 
     class ImageAdapter extends BaseAdapter {
         private Context mContext;
-        private List<MoviesResult.Movie> movies = new ArrayList<>();
+        private List<Movies.Movie> movies = new ArrayList<>();
 
         public ImageAdapter(Context c) {
             mContext = c;
         }
 
-        public void add(List<MoviesResult.Movie> movies) {
+        public void add(List<Movies.Movie> movies) {
             this.movies = movies;
             notifyDataSetChanged();
         }
@@ -389,7 +204,7 @@ public class MoviesFragment extends Fragment {
         }
 
         public Object getItem(int position) {
-            return movieInfos.get(position);
+            return MoviesFragment.this.movies.get(position);
         }
 
         public long getItemId(int position) {
@@ -412,11 +227,5 @@ public class MoviesFragment extends Fragment {
 
             return container;
         }
-    }
-
-    public interface Callback {
-        void initDetail(MovieInfo movieInfo);
-        void onResult();
-        void onItemClick(MovieInfo movieInfo);
     }
 }

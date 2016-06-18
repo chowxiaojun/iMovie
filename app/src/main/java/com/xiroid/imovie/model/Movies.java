@@ -1,12 +1,15 @@
 package com.xiroid.imovie.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.List;
 
 /**
  * @author xiaojunzhou
  * @date 16/6/14
  */
-public class MoviesResult {
+public class Movies {
     /**
      * total_results : 19678
      * total_pages : 984
@@ -66,7 +69,8 @@ public class MoviesResult {
         this.results = results;
     }
 
-    public static class Movie {
+    public static class Movie implements Parcelable{
+
         private String poster_path;
         private boolean adult;
         private String overview;
@@ -81,8 +85,42 @@ public class MoviesResult {
         private boolean video;
         private double vote_average;
         private List<Integer> genre_ids;
+        private int favorite;
 
         private static final String BASE_IMG_URL ="http://image.tmdb.org/t/p/w185/";
+
+        public Movie() {
+
+        }
+        
+        protected Movie(Parcel in) {
+            poster_path = in.readString();
+            adult = in.readByte() != 0;
+            overview = in.readString();
+            release_date = in.readString();
+            id = in.readInt();
+            original_title = in.readString();
+            original_language = in.readString();
+            title = in.readString();
+            backdrop_path = in.readString();
+            popularity = in.readDouble();
+            vote_count = in.readInt();
+            video = in.readByte() != 0;
+            vote_average = in.readDouble();
+            favorite = in.readInt();
+        }
+
+        public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+            @Override
+            public Movie createFromParcel(Parcel in) {
+                return new Movie(in);
+            }
+
+            @Override
+            public Movie[] newArray(int size) {
+                return new Movie[size];
+            }
+        };
 
         public String getPoster() {
             return BASE_IMG_URL + poster_path;
@@ -198,6 +236,37 @@ public class MoviesResult {
 
         public void setGenre_ids(List<Integer> genre_ids) {
             this.genre_ids = genre_ids;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(poster_path);
+            dest.writeByte((byte) (adult ? 1 : 0));
+            dest.writeString(overview);
+            dest.writeString(release_date);
+            dest.writeInt(id);
+            dest.writeString(original_title);
+            dest.writeString(original_language);
+            dest.writeString(title);
+            dest.writeString(backdrop_path);
+            dest.writeDouble(popularity);
+            dest.writeInt(vote_count);
+            dest.writeByte((byte) (video ? 1 : 0));
+            dest.writeDouble(vote_average);
+            dest.writeInt(favorite);
+        }
+
+        public int getFavorite() {
+            return favorite;
+        }
+
+        public void setFavorite(int favorite) {
+            this.favorite = favorite;
         }
     }
 }
