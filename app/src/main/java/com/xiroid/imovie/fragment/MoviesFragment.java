@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,7 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
 import com.xiroid.imovie.BuildConfig;
 import com.xiroid.imovie.R;
@@ -67,7 +67,7 @@ public class MoviesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView");
+        Logger.d("onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         mGridView = (GridView) rootView.findViewById(R.id.movies_gridView);
         TextView textView = (TextView) rootView.findViewById(R.id.empty_view);
@@ -95,7 +95,7 @@ public class MoviesFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Log.d(TAG, "onStart");
+        Logger.d("onStart");
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         String sortBy = sharedPref.getString(
                 getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
