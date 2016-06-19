@@ -1,25 +1,23 @@
 package com.xiroid.imovie.fragment;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.orhanobut.logger.Logger;
-import com.squareup.picasso.Picasso;
 import com.xiroid.imovie.BuildConfig;
+import com.xiroid.imovie.MoviesAdapter;
 import com.xiroid.imovie.R;
-import com.xiroid.imovie.SimpleImageView;
 import com.xiroid.imovie.api.MovieService;
 import com.xiroid.imovie.data.MovieContract;
 import com.xiroid.imovie.model.Movies;
@@ -40,9 +38,11 @@ public class MoviesFragment extends Fragment {
     private static final String SELECT_KEY = "select_key";
     private static final String MOVIE_LIST = "movie_list";
 
-    private GridView mGridView;
-    private ImageAdapter mImageAdapter;
-    private ArrayList<Movies.Movie> movies;
+    private RecyclerView mRecycleView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+    
+    private List<Movies.Movie> movies = new ArrayList<>();
     private int mPosition = GridView.INVALID_POSITION;
 
     private static final String[] FAVORITE_PROJECTION = {
@@ -69,18 +69,8 @@ public class MoviesFragment extends Fragment {
                              Bundle savedInstanceState) {
         Logger.d("onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        mGridView = (GridView) rootView.findViewById(R.id.movies_gridView);
+        mRecycleView = (RecyclerView) rootView.findViewById(R.id.movies_recycleView);
         TextView textView = (TextView) rootView.findViewById(R.id.empty_view);
-        mGridView.setEmptyView(textView);
-        mImageAdapter = new ImageAdapter(getActivity());
-        mGridView.setAdapter(mImageAdapter);
-        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Movies.Movie movie = (Movies.Movie) mImageAdapter.getItem(position);
-                mPosition = position;
-            }
-        });
 
         if (savedInstanceState != null
                 && savedInstanceState.containsKey(SELECT_KEY)
@@ -106,13 +96,13 @@ public class MoviesFragment extends Fragment {
                 .build();
 
         MovieService service = retrofit.create(MovieService.class);
-        Call<Movies> call = service.getMovies(sortBy, BuildConfig.THE_MOVIE_API_KEY, null);
+        Call<Movies> call = service.getMovies("popular", BuildConfig.THE_MOVIE_API_KEY, null);
         call.enqueue(new retrofit2.Callback<Movies>() {
             @Override
             public void onResponse(Call<Movies> call, Response<Movies> response) {
                 if (response.isSuccessful()) {
                     Movies result = response.body();
-                    movies = (ArrayList<Movies.Movie>) result.getResults();
+                    movies = result.getResults();
                     updateView();
                 } else {
 
@@ -128,21 +118,24 @@ public class MoviesFragment extends Fragment {
 
     private void updateView() {
         if (movies != null) {
-            mImageAdapter.add(movies);
+            mAdapter = new MoviesAdapter(getActivity(), movies);
+            mRecycleView.setAdapter(mAdapter);
+            mLayoutManager = new GridLayoutManager(getActivity(), 2);
+            mRecycleView.setLayoutManager(mLayoutManager);
         }
+
         if (getView() != null) {
             LinearLayout progress = (LinearLayout) getView().findViewById(R.id.progress_view);
             LinearLayout content = (LinearLayout) getView().findViewById(R.id.content);
             progress.setVisibility(View.GONE);
             content.setVisibility(View.VISIBLE);
         }
-
     }
 
     private void loadMovies() {
         if (mPosition == GridView.INVALID_POSITION || movies == null) {
         } else {
-            mGridView.smoothScrollToPosition(mPosition);
+            mRecycleView.smoothScrollToPosition(mPosition);
         }
     }
 
@@ -150,7 +143,7 @@ public class MoviesFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         if (mPosition != GridView.INVALID_POSITION) {
             outState.putInt(SELECT_KEY, mPosition);
-            outState.putParcelableArrayList(MOVIE_LIST, movies);
+            outState.putParcelableArrayList(MOVIE_LIST, (ArrayList<Movies.Movie>) movies);
         }
         super.onSaveInstanceState(outState);
     }
@@ -186,46 +179,4 @@ public class MoviesFragment extends Fragment {
         }
     }
 
-    class ImageAdapter extends BaseAdapter {
-        private Context mContext;
-        private List<Movies.Movie> movies = new ArrayList<>();
-
-        public ImageAdapter(Context c) {
-            mContext = c;
-        }
-
-        public void add(List<Movies.Movie> movies) {
-            this.movies = movies;
-            notifyDataSetChanged();
-        }
-
-        public int getCount() {
-            return movies.size();
-        }
-
-        public Object getItem(int position) {
-            return MoviesFragment.this.movies.get(position);
-        }
-
-        public long getItemId(int position) {
-            return 0;
-        }
-
-        public View getView(int position, View convertView, ViewGroup parent) {
-            LinearLayout container;
-            if (convertView == null) {
-                container = (LinearLayout) LayoutInflater.from(mContext).inflate(R.layout.grid_movies_item, null, false);
-
-            } else {
-                container = (LinearLayout) convertView;
-            }
-
-            SimpleImageView imageView = (SimpleImageView) container.findViewById(R.id.iv_poster);
-            Picasso.with(mContext).load(movies.get(position).getPoster()).into(imageView);
-            TextView textView = (TextView) container.findViewById(R.id.txt_title);
-            textView.setText(movies.get(position).getOriginal_title());
-
-            return container;
-        }
-    }
 }
