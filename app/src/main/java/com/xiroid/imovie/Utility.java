@@ -10,16 +10,16 @@ import android.preference.PreferenceManager;
  */
 public class Utility {
 
-    public static String getMovieCategory(Context context) {
+    public static String getDataSourceCategory(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getString(context.getString(R.string.pref_sort_key),
-                context.getString(R.string.pref_sort_upcoming));
+        return sp.getString(context.getString(R.string.pref_data_source_type),
+                context.getString(R.string.data_source_movie));
     }
 
-    public static void setMovieCategory(Context context, int resId) {
+    public static void setDataSourceCategory(Context context, int resId) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(context.getString(R.string.pref_sort_key),
+        editor.putString(context.getString(R.string.pref_data_source_type),
                 context.getString(resId));
         editor.apply();
     }

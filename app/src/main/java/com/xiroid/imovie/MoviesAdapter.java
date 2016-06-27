@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
 import com.xiroid.imovie.model.Movies;
 
 import java.util.List;
@@ -40,19 +39,19 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     public ViewHolder onCreateViewHolder(ViewGroup parent,
                                          int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.grid_movies_item, parent, false);
+                .inflate(R.layout.list_item_layout, parent, false);
         return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Movies.Movie movie = movies.get(position);
-        holder.titleTxt.setText(movie.getOriginal_title());
-        Picasso.with(context)
-                .load(movie.getPoster())
-                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
-                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
-                .into(holder.posterImg);
+//        Movies.Movie movie = movies.get(position);
+//        holder.titleTxt.setText(movie.getOriginal_title());
+//        Picasso.with(context)
+//                .load(movie.getPoster())
+//                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
+//                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
+//                .into(holder.posterImg);
     }
 
     @Override

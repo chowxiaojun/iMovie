@@ -21,6 +21,10 @@
     <string name="pref_sort_now_playing">now_playing</string>
     <string name="pref_sort_upcoming">upcoming</string>
 
+    <string name="pref_data_source_type">type</string>
+    <string name="data_source_movie">Movie</string>
+    <string name="data_source_tv">TV</string>
+
     <string name="txt_main_loading">loading...</string>
     <string name="txt_empty_network_err">Network Error</string>
     <string name="txt_empty_no_favorites">No Favorites</string>

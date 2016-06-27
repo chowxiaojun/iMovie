@@ -1,8 +1,6 @@
 package com.xiroid.imovie.activity;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -60,33 +58,17 @@ public class MainActivity extends AppCompatActivity
         if (navigationView == null) {
             return;
         }
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        String sortBy = sp.getString(getString(R.string.pref_sort_key),
-                getString(R.string.pref_sort_upcoming));
-        switch (sortBy) {
-            case "upcoming": {
-                navigationView.setCheckedItem(R.id.nav_upcoming);
-                setTitle(R.string.pref_sort_label_upcoming);
+
+        String sourceType = Utility.getDataSourceCategory(getApplicationContext());
+        switch (sourceType) {
+            case "Movie": {
+                navigationView.setCheckedItem(R.id.nav_movie);
+                setTitle(R.string.data_source_movie);
                 break;
             }
-            case "now_playing": {
-                navigationView.setCheckedItem(R.id.nav_now_playing);
-                setTitle(R.string.pref_sort_label_now_playing);
-                break;
-            }
-            case "favorite": {
-                navigationView.setCheckedItem(R.id.nav_favorite);
-                setTitle(R.string.pref_sort_label_favorite);
-                break;
-            }
-            case "top_rated": {
-                navigationView.setCheckedItem(R.id.nav_top_rated);
-                setTitle(R.string.pref_sort_label_top_rated);
-                break;
-            }
-            case "popular": {
-                navigationView.setCheckedItem(R.id.nav_popular);
-                setTitle(R.string.pref_sort_label_popular);
+            case "TV": {
+                navigationView.setCheckedItem(R.id.nav_tv);
+                setTitle(R.string.data_source_tv);
                 break;
             }
             default:
@@ -144,22 +126,13 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.nav_popular) {
-            Utility.setMovieCategory(getApplicationContext(), R.string.pref_sort_popular);
-            setTitle(R.string.pref_sort_label_popular);
-        } else if (id == R.id.nav_top_rated) {
-            Utility.setMovieCategory(getApplicationContext(), R.string.pref_sort_top_rated);
-            setTitle(R.string.pref_sort_label_top_rated);
-        } else if (id == R.id.nav_favorite) {
-            Utility.setMovieCategory(getApplicationContext(), R.string.pref_sort_favorite);
-            setTitle(R.string.pref_sort_label_favorite);
-        } else if (id == R.id.nav_upcoming) {
-            Utility.setMovieCategory(getApplicationContext(), R.string.pref_sort_upcoming);
-            setTitle(R.string.pref_sort_label_upcoming);
-        } else if (id == R.id.nav_now_playing) {
-            Utility.setMovieCategory(getApplicationContext(), R.string.pref_sort_now_playing);
-            setTitle(R.string.pref_sort_label_now_playing);
-        } else if (id == R.id.nav_share) {
+        if (id == R.id.nav_movie) {
+            Utility.setDataSourceCategory(getApplicationContext(), R.string.data_source_movie);
+            setTitle(R.string.data_source_movie);
+        } else if (id == R.id.nav_tv) {
+            Utility.setDataSourceCategory(getApplicationContext(), R.string.data_source_tv);
+            setTitle(R.string.data_source_tv);
+        }  else if (id == R.id.nav_share) {
         } else if (id == R.id.nav_send) {
         }
 

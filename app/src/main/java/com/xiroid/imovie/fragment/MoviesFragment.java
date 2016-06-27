@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -120,7 +120,7 @@ public class MoviesFragment extends Fragment {
         if (movies != null) {
             mAdapter = new MoviesAdapter(getActivity(), movies);
             mRecycleView.setAdapter(mAdapter);
-            mLayoutManager = new GridLayoutManager(getActivity(), 2);
+            mLayoutManager = new LinearLayoutManager(getActivity());
             mRecycleView.setLayoutManager(mLayoutManager);
         }
 
