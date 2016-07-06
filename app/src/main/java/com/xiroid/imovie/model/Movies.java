@@ -10,33 +10,19 @@ import java.util.List;
  * @date 16/6/14
  */
 public class Movies {
-    /**
-     * total_results : 19678
-     * total_pages : 984
-     */
-
+    private String groupTitle;
     private int page;
     private int total_results;
     private int total_pages;
-    /**
-     * poster_path : /inVq3FRqcYIRl2la8iZikYYxFNR.jpg
-     * adult : false
-     * overview : Based upon Marvel Comics’ most unconventional anti-hero, DEADPOOL tells the origin story of former Special Forces operative turned mercenary Wade Wilson, who after being subjected to a rogue experiment that leaves him with accelerated healing powers, adopts the alter ego Deadpool. Armed with his new abilities and a dark, twisted sense of humor, Deadpool hunts down the man who nearly destroyed his life.
-     * release_date : 2016-02-09
-     * genre_ids : [28,12,35,10749]
-     * id : 293660
-     * original_title : Deadpool
-     * original_language : en
-     * title : Deadpool
-     * backdrop_path : /nbIrDhOtUpdD9HKDBRy02a8VhpV.jpg
-     * popularity : 96.752277
-     * vote_count : 3524
-     * video : false
-     * vote_average : 7.19
-     */
+    private List<Movie> results;  // the list of Movie
 
-    private List<Movie> results;
+    public String getGroupTitle() {
+        return groupTitle;
+    }
 
+    public void setGroupTitle(String groupTitle) {
+        this.groupTitle = groupTitle;
+    }
     public int getPage() {
         return page;
     }

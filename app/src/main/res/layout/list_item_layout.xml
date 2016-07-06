@@ -32,17 +32,20 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <com.xiroid.imovie.SimpleImageView
+            android:id="@+id/first_movie"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:src="@drawable/placeholder"/>
         <com.xiroid.imovie.SimpleImageView
+            android:id="@+id/second_movie"
             android:layout_marginLeft="10dp"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:src="@drawable/placeholder"/>
         <com.xiroid.imovie.SimpleImageView
+            android:id="@+id/third_movie"
             android:layout_marginLeft="10dp"
             android:layout_weight="1"
             android:layout_width="0dp"

@@ -7,8 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.xiroid.imovie.model.Movies;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,51 +18,70 @@ import java.util.List;
  * @date 16/6/19
  */
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder> {
-    private List<Movies.Movie> movies;
+    private List<Movies> moviesList = new ArrayList<>();
     private Context context;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public SimpleImageView posterImg;
-        public TextView titleTxt;
+        public SimpleImageView firstPosterImg;
+        public SimpleImageView secondPosterImg;
+        public SimpleImageView thirdPosterImg;
+        public TextView groupTitleTxt;
 
         public ViewHolder(View view) {
             super(view);
-            posterImg = (SimpleImageView) view.findViewById(R.id.iv_poster);
-            titleTxt = (TextView) view.findViewById(R.id.txt_title);
+            firstPosterImg = (SimpleImageView) view.findViewById(R.id.first_movie);
+            secondPosterImg = (SimpleImageView) view.findViewById(R.id.second_movie);
+            thirdPosterImg = (SimpleImageView) view.findViewById(R.id.third_movie);
+            groupTitleTxt = (TextView) view.findViewById(R.id.group_title);
         }
     }
 
-    public MoviesAdapter(Context context, List<Movies.Movie> movies) {
+    public MoviesAdapter(Context context) {
         this.context = context;
-        this.movies = movies;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return super.getItemViewType(position);
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent,
                                          int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
+        View v = LayoutInflater.from(context)
                 .inflate(R.layout.list_item_layout, parent, false);
         return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-//        Movies.Movie movie = movies.get(position);
-//        holder.titleTxt.setText(movie.getOriginal_title());
-//        Picasso.with(context)
-//                .load(movie.getPoster())
-//                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
-//                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
-//                .into(holder.posterImg);
+        Movies movies = moviesList.get(position);
+        holder.groupTitleTxt.setText(movies.getGroupTitle());
+        Picasso.with(context)
+                .load(movies.getResults().get(0).getPoster())
+                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
+                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
+                .into(holder.firstPosterImg);
+        Picasso.with(context)
+                .load(movies.getResults().get(1).getPoster())
+                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
+                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
+                .into(holder.secondPosterImg);
+        Picasso.with(context)
+                .load(movies.getResults().get(2).getPoster())
+                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
+                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
+                .into(holder.thirdPosterImg);
     }
 
     @Override
     public int getItemCount() {
-        return movies.size();
+        return moviesList.size();
     }
 
-    public void setMovies(List<Movies.Movie> movies) {
-        this.movies = movies;
+
+    public void addMovies(Movies movies, int index) {
+        moviesList.add(index, movies);
         notifyDataSetChanged();
     }
 }

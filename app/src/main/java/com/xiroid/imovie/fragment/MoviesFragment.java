@@ -1,18 +1,15 @@
 package com.xiroid.imovie.fragment;
 
-import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.orhanobut.logger.Logger;
 import com.xiroid.imovie.BuildConfig;
@@ -21,9 +18,6 @@ import com.xiroid.imovie.R;
 import com.xiroid.imovie.api.MovieService;
 import com.xiroid.imovie.data.MovieContract;
 import com.xiroid.imovie.model.Movies;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -42,7 +36,6 @@ public class MoviesFragment extends Fragment {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     
-    private List<Movies.Movie> movies = new ArrayList<>();
     private int mPosition = GridView.INVALID_POSITION;
 
     private static final String[] FAVORITE_PROJECTION = {
@@ -70,13 +63,31 @@ public class MoviesFragment extends Fragment {
         Logger.d("onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         mRecycleView = (RecyclerView) rootView.findViewById(R.id.movies_recycleView);
-        TextView textView = (TextView) rootView.findViewById(R.id.empty_view);
+        mAdapter = new MoviesAdapter(getActivity());
+        mRecycleView.setAdapter(mAdapter);
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mRecycleView.setLayoutManager(mLayoutManager);
+        mRecycleView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+
+            }
+
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+            }
+        });
 
         if (savedInstanceState != null
                 && savedInstanceState.containsKey(SELECT_KEY)
                 && savedInstanceState.containsKey(MOVIE_LIST)) {
             mPosition = savedInstanceState.getInt(SELECT_KEY, GridView.INVALID_POSITION);
-            movies = savedInstanceState.getParcelableArrayList(MOVIE_LIST);
         }
 
         return rootView;
@@ -86,26 +97,21 @@ public class MoviesFragment extends Fragment {
     public void onStart() {
         super.onStart();
         Logger.d("onStart");
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String sortBy = sharedPref.getString(
-                getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
-
         Retrofit retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
                 .baseUrl(MovieService.BASE_URL)
                 .build();
 
         MovieService service = retrofit.create(MovieService.class);
-        Call<Movies> call = service.getMovies("popular", BuildConfig.THE_MOVIE_API_KEY, null);
+        Call<Movies> call = service.getMovies(getString(R.string.pref_sort_popular), BuildConfig.THE_MOVIE_API_KEY, null);
         call.enqueue(new retrofit2.Callback<Movies>() {
             @Override
             public void onResponse(Call<Movies> call, Response<Movies> response) {
                 if (response.isSuccessful()) {
                     Movies result = response.body();
-                    movies = result.getResults();
+                    result.setGroupTitle(getString(R.string.pref_sort_popular));
+                    ((MoviesAdapter) mAdapter).addMovies(result, 0);
                     updateView();
-                } else {
-
                 }
             }
 
@@ -117,13 +123,6 @@ public class MoviesFragment extends Fragment {
     }
 
     private void updateView() {
-        if (movies != null) {
-            mAdapter = new MoviesAdapter(getActivity(), movies);
-            mRecycleView.setAdapter(mAdapter);
-            mLayoutManager = new LinearLayoutManager(getActivity());
-            mRecycleView.setLayoutManager(mLayoutManager);
-        }
-
         if (getView() != null) {
             LinearLayout progress = (LinearLayout) getView().findViewById(R.id.progress_view);
             LinearLayout content = (LinearLayout) getView().findViewById(R.id.content);
@@ -133,7 +132,7 @@ public class MoviesFragment extends Fragment {
     }
 
     private void loadMovies() {
-        if (mPosition == GridView.INVALID_POSITION || movies == null) {
+        if (mPosition == GridView.INVALID_POSITION) {
         } else {
             mRecycleView.smoothScrollToPosition(mPosition);
         }
@@ -143,40 +142,40 @@ public class MoviesFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         if (mPosition != GridView.INVALID_POSITION) {
             outState.putInt(SELECT_KEY, mPosition);
-            outState.putParcelableArrayList(MOVIE_LIST, (ArrayList<Movies.Movie>) movies);
+            //outState.putParcelableArrayList(MOVIE_LIST, (ArrayList<Movies.Movie>) movies);
         }
         super.onSaveInstanceState(outState);
     }
 
-    private void getFavoritesFromDb() {
-        Cursor cursor = null;
-        try {
-            cursor = getContext().getContentResolver().query(MovieContract.FavoriteEntry.CONTENT_URI,
-                    FAVORITE_PROJECTION,
-                    null,
-                    null,
-                    null
-            );
-            if (cursor != null) {
-                movies = new ArrayList<>();
-                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                    int movieId = cursor.getInt(COL_FAVORITE_MOVIE_ID);
-                    Movies.Movie movieInfo = new Movies.Movie();
-                    movieInfo.setFavorite(1);
-                    movieInfo.setId(cursor.getInt(COL_FAVORITE_MOVIE_ID));
-                    movieInfo.setOriginal_title(cursor.getString(COL_FAVORITE_MOVIE_TITLE));
-                    movieInfo.setOverview(cursor.getString(COL_FAVORITE_MOVIE_OVERVIEW));
-                    movieInfo.setRelease_date(cursor.getString(COL_FAVORITE_MOVIE_RELEASE_DATE));
-                    movieInfo.setPoster_path(cursor.getString(COL_FAVORITE_MOVIE_POSTER));
-                    movieInfo.setVote_average(cursor.getDouble(COL_FAVORITE_MOVIE_VOTE_AVERAGE));
-                    movies.add(movieInfo);
-                }
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
+//    private void getFavoritesFromDb() {
+//        Cursor cursor = null;
+//        try {
+//            cursor = getContext().getContentResolver().query(MovieContract.FavoriteEntry.CONTENT_URI,
+//                    FAVORITE_PROJECTION,
+//                    null,
+//                    null,
+//                    null
+//            );
+//            if (cursor != null) {
+//                movies = new ArrayList<>();
+//                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+//                    int movieId = cursor.getInt(COL_FAVORITE_MOVIE_ID);
+//                    Movies.Movie movieInfo = new Movies.Movie();
+//                    movieInfo.setFavorite(1);
+//                    movieInfo.setId(cursor.getInt(COL_FAVORITE_MOVIE_ID));
+//                    movieInfo.setOriginal_title(cursor.getString(COL_FAVORITE_MOVIE_TITLE));
+//                    movieInfo.setOverview(cursor.getString(COL_FAVORITE_MOVIE_OVERVIEW));
+//                    movieInfo.setRelease_date(cursor.getString(COL_FAVORITE_MOVIE_RELEASE_DATE));
+//                    movieInfo.setPoster_path(cursor.getString(COL_FAVORITE_MOVIE_POSTER));
+//                    movieInfo.setVote_average(cursor.getDouble(COL_FAVORITE_MOVIE_VOTE_AVERAGE));
+//                    movies.add(movieInfo);
+//                }
+//            }
+//        } finally {
+//            if (cursor != null) {
+//                cursor.close();
+//            }
+//        }
+//    }
 
 }
