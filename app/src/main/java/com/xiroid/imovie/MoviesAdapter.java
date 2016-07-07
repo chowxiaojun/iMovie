@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
 import com.xiroid.imovie.model.Movies;
 
@@ -18,7 +19,7 @@ import java.util.List;
  * @date 16/6/19
  */
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder> {
-    private List<Movies> moviesList = new ArrayList<>();
+    private ArrayList<Movies> moviesList = new ArrayList<>();
     private Context context;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -48,13 +49,20 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent,
                                          int viewType) {
-        View v = LayoutInflater.from(context)
+        View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_layout, parent, false);
         return new ViewHolder(v);
     }
 
     @Override
+    public void onBindViewHolder(ViewHolder holder, int position, List<Object> payloads) {
+        super.onBindViewHolder(holder, position, payloads);
+        Logger.d("onBindViewHolder " + "position: " + position);
+    }
+
+    @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        Logger.d("onBindViewHolder" + moviesList.size() + " position: " + position);
         Movies movies = moviesList.get(position);
         holder.groupTitleTxt.setText(movies.getGroupTitle());
         Picasso.with(context)
@@ -80,8 +88,9 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     }
 
 
-    public void addMovies(Movies movies, int index) {
-        moviesList.add(index, movies);
-        notifyDataSetChanged();
+    public void addMovies(Movies movies) {
+        Logger.d("addMovies");
+        moviesList.add(movies);
+        notifyItemInserted(moviesList.size() - 1);
     }
 }

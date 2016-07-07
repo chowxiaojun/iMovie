@@ -2,22 +2,23 @@ package com.xiroid.imovie.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
-import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.orhanobut.logger.Logger;
+import com.squareup.picasso.Picasso;
 import com.xiroid.imovie.BuildConfig;
-import com.xiroid.imovie.MoviesAdapter;
 import com.xiroid.imovie.R;
+import com.xiroid.imovie.SimpleImageView;
 import com.xiroid.imovie.api.MovieService;
 import com.xiroid.imovie.data.MovieContract;
 import com.xiroid.imovie.model.Movies;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -32,10 +33,10 @@ public class MoviesFragment extends Fragment {
     private static final String SELECT_KEY = "select_key";
     private static final String MOVIE_LIST = "movie_list";
 
-    private RecyclerView mRecycleView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
-    
+    View progressView;
+    ViewGroup mContainer;
+    private List<Movies> moviesList = new ArrayList<>();
+
     private int mPosition = GridView.INVALID_POSITION;
 
     private static final String[] FAVORITE_PROJECTION = {
@@ -62,28 +63,8 @@ public class MoviesFragment extends Fragment {
                              Bundle savedInstanceState) {
         Logger.d("onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        mRecycleView = (RecyclerView) rootView.findViewById(R.id.movies_recycleView);
-        mAdapter = new MoviesAdapter(getActivity());
-        mRecycleView.setAdapter(mAdapter);
-        mLayoutManager = new LinearLayoutManager(getActivity());
-        mRecycleView.setLayoutManager(mLayoutManager);
-        mRecycleView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                return false;
-            }
-
-            @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-
-            }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-            }
-        });
-
+        mContainer = (ViewGroup) rootView.findViewById(R.id.container);
+        progressView = rootView.findViewById(R.id.progress_view);
         if (savedInstanceState != null
                 && savedInstanceState.containsKey(SELECT_KEY)
                 && savedInstanceState.containsKey(MOVIE_LIST)) {
@@ -103,15 +84,47 @@ public class MoviesFragment extends Fragment {
                 .build();
 
         MovieService service = retrofit.create(MovieService.class);
-        Call<Movies> call = service.getMovies(getString(R.string.pref_sort_popular), BuildConfig.THE_MOVIE_API_KEY, null);
-        call.enqueue(new retrofit2.Callback<Movies>() {
+        Call<Movies> popular = service.getMovies(getString(R.string.pref_sort_popular), BuildConfig.THE_MOVIE_API_KEY, null);
+        popular.enqueue(new retrofit2.Callback<Movies>() {
             @Override
             public void onResponse(Call<Movies> call, Response<Movies> response) {
                 if (response.isSuccessful()) {
                     Movies result = response.body();
                     result.setGroupTitle(getString(R.string.pref_sort_popular));
-                    ((MoviesAdapter) mAdapter).addMovies(result, 0);
-                    updateView();
+                    updateView(result);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Movies> call, Throwable t) {
+
+            }
+        });
+        Call<Movies> topRated = service.getMovies(getString(R.string.pref_sort_top_rated), BuildConfig.THE_MOVIE_API_KEY, null);
+        topRated.enqueue(new retrofit2.Callback<Movies>() {
+            @Override
+            public void onResponse(Call<Movies> call, Response<Movies> response) {
+                if (response.isSuccessful()) {
+                    Movies result = response.body();
+                    result.setGroupTitle(getString(R.string.pref_sort_top_rated));
+                    updateView(result);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Movies> call, Throwable t) {
+
+            }
+        });
+
+        Call<Movies> nowPlaying = service.getMovies(getString(R.string.pref_sort_now_playing), BuildConfig.THE_MOVIE_API_KEY, null);
+        nowPlaying.enqueue(new retrofit2.Callback<Movies>() {
+            @Override
+            public void onResponse(Call<Movies> call, Response<Movies> response) {
+                if (response.isSuccessful()) {
+                    Movies result = response.body();
+                    result.setGroupTitle(getString(R.string.pref_sort_now_playing));
+                    updateView(result);
                 }
             }
 
@@ -122,21 +135,35 @@ public class MoviesFragment extends Fragment {
         });
     }
 
-    private void updateView() {
-        if (getView() != null) {
-            LinearLayout progress = (LinearLayout) getView().findViewById(R.id.progress_view);
-            LinearLayout content = (LinearLayout) getView().findViewById(R.id.content);
-            progress.setVisibility(View.GONE);
-            content.setVisibility(View.VISIBLE);
+    private void updateView(Movies movies) {
+        if (progressView.getVisibility() == View.VISIBLE) {
+            progressView.setVisibility(View.GONE);
         }
+        moviesList.add(movies);
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_layout, mContainer, false);
+        TextView titleTxt = (TextView) view.findViewById(R.id.group_title);
+        SimpleImageView firstPosterImg = (SimpleImageView) view.findViewById(R.id.first_movie);
+        SimpleImageView secondPosterImg = (SimpleImageView) view.findViewById(R.id.second_movie);
+        SimpleImageView thirdPosterImg = (SimpleImageView) view.findViewById(R.id.third_movie);
+        titleTxt.setText(movies.getGroupTitle());
+        Picasso.with(getActivity())
+                .load(movies.getResults().get(0).getPoster())
+                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
+                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
+                .into(firstPosterImg);
+        Picasso.with(getActivity())
+                .load(movies.getResults().get(1).getPoster())
+                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
+                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
+                .into(secondPosterImg);
+        Picasso.with(getActivity())
+                .load(movies.getResults().get(2).getPoster())
+                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
+                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
+                .into(thirdPosterImg);
+        mContainer.addView(view);
     }
 
-    private void loadMovies() {
-        if (mPosition == GridView.INVALID_POSITION) {
-        } else {
-            mRecycleView.smoothScrollToPosition(mPosition);
-        }
-    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
