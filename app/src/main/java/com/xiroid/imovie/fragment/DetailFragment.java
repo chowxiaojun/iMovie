@@ -16,7 +16,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.xiroid.imovie.BuildConfig;
 import com.xiroid.imovie.R;
-import com.xiroid.imovie.SimpleImageView;
+import com.xiroid.imovie.widget.AspectRatioImageView;
 import com.xiroid.imovie.data.MovieContract;
 import com.xiroid.imovie.model.Movies;
 import com.xiroid.imovie.model.Reviews;
@@ -95,7 +95,7 @@ public class DetailFragment extends Fragment {
             // http://jakewharton.github.io/butterknife/
             // Also, a video tutorial:
             // https://www.youtube.com/watch?v=1A4LY8gUEDs
-            SimpleImageView poster = (SimpleImageView) rootView.findViewById(R.id.image_poster);
+            AspectRatioImageView poster = (AspectRatioImageView) rootView.findViewById(R.id.image_poster);
             TextView title = (TextView) rootView.findViewById(R.id.txt_title);
             TextView rating = (TextView) rootView.findViewById(R.id.txt_rating);
             TextView releaseDate = (TextView) rootView.findViewById(R.id.txt_releaseDate);

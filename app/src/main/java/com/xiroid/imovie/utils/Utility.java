@@ -1,8 +1,10 @@
-package com.xiroid.imovie;
+package com.xiroid.imovie.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
+import com.xiroid.imovie.R;
 
 /**
  * @author xiaojunzhou

@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:gravity="center">
 
-    <com.xiroid.imovie.SimpleImageView
+    <com.xiroid.imovie.widget.AspectRatioImageView
         android:id="@+id/iv_poster"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
 import com.xiroid.imovie.model.Movies;
+import com.xiroid.imovie.widget.AspectRatioImageView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,16 +24,16 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     private Context context;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public SimpleImageView firstPosterImg;
-        public SimpleImageView secondPosterImg;
-        public SimpleImageView thirdPosterImg;
+        public AspectRatioImageView firstPosterImg;
+        public AspectRatioImageView secondPosterImg;
+        public AspectRatioImageView thirdPosterImg;
         public TextView groupTitleTxt;
 
         public ViewHolder(View view) {
             super(view);
-            firstPosterImg = (SimpleImageView) view.findViewById(R.id.first_movie);
-            secondPosterImg = (SimpleImageView) view.findViewById(R.id.second_movie);
-            thirdPosterImg = (SimpleImageView) view.findViewById(R.id.third_movie);
+            firstPosterImg = (AspectRatioImageView) view.findViewById(R.id.first_movie);
+            secondPosterImg = (AspectRatioImageView) view.findViewById(R.id.second_movie);
+            thirdPosterImg = (AspectRatioImageView) view.findViewById(R.id.third_movie);
             groupTitleTxt = (TextView) view.findViewById(R.id.group_title);
         }
     }

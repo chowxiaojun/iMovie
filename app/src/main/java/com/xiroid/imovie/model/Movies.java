@@ -61,7 +61,7 @@ public class Movies {
         private boolean adult;
         private String overview;
         private String release_date;
-        private int id;
+        private long id;
         private String original_title;
         private String original_language;
         private String title;
@@ -84,7 +84,7 @@ public class Movies {
             adult = in.readByte() != 0;
             overview = in.readString();
             release_date = in.readString();
-            id = in.readInt();
+            id = in.readLong();
             original_title = in.readString();
             original_language = in.readString();
             title = in.readString();
@@ -144,11 +144,11 @@ public class Movies {
             this.release_date = release_date;
         }
 
-        public int getId() {
+        public long getId() {
             return id;
         }
 
-        public void setId(int id) {
+        public void setId(long id) {
             this.id = id;
         }
 
@@ -235,7 +235,7 @@ public class Movies {
             dest.writeByte((byte) (adult ? 1 : 0));
             dest.writeString(overview);
             dest.writeString(release_date);
-            dest.writeInt(id);
+            dest.writeLong(id);
             dest.writeString(original_title);
             dest.writeString(original_language);
             dest.writeString(title);

@@ -1,5 +1,6 @@
 package com.xiroid.imovie.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -10,20 +11,14 @@ import android.widget.TextView;
 
 import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
-import com.xiroid.imovie.BuildConfig;
 import com.xiroid.imovie.R;
-import com.xiroid.imovie.SimpleImageView;
-import com.xiroid.imovie.api.MovieService;
+import com.xiroid.imovie.activity.DetailActivity;
 import com.xiroid.imovie.data.MovieContract;
 import com.xiroid.imovie.model.Movies;
+import com.xiroid.imovie.widget.AspectRatioImageView;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -78,61 +73,22 @@ public class MoviesFragment extends Fragment {
     public void onStart() {
         super.onStart();
         Logger.d("onStart");
-        Retrofit retrofit = new Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(MovieService.BASE_URL)
-                .build();
-
-        MovieService service = retrofit.create(MovieService.class);
-        Call<Movies> popular = service.getMovies(getString(R.string.pref_sort_popular), BuildConfig.THE_MOVIE_API_KEY, null);
-        popular.enqueue(new retrofit2.Callback<Movies>() {
-            @Override
-            public void onResponse(Call<Movies> call, Response<Movies> response) {
-                if (response.isSuccessful()) {
-                    Movies result = response.body();
-                    result.setGroupTitle(getString(R.string.pref_sort_popular));
-                    updateView(result);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Movies> call, Throwable t) {
-
-            }
-        });
-        Call<Movies> topRated = service.getMovies(getString(R.string.pref_sort_top_rated), BuildConfig.THE_MOVIE_API_KEY, null);
-        topRated.enqueue(new retrofit2.Callback<Movies>() {
-            @Override
-            public void onResponse(Call<Movies> call, Response<Movies> response) {
-                if (response.isSuccessful()) {
-                    Movies result = response.body();
-                    result.setGroupTitle(getString(R.string.pref_sort_top_rated));
-                    updateView(result);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Movies> call, Throwable t) {
-
-            }
-        });
-
-        Call<Movies> nowPlaying = service.getMovies(getString(R.string.pref_sort_now_playing), BuildConfig.THE_MOVIE_API_KEY, null);
-        nowPlaying.enqueue(new retrofit2.Callback<Movies>() {
-            @Override
-            public void onResponse(Call<Movies> call, Response<Movies> response) {
-                if (response.isSuccessful()) {
-                    Movies result = response.body();
-                    result.setGroupTitle(getString(R.string.pref_sort_now_playing));
-                    updateView(result);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Movies> call, Throwable t) {
-
-            }
-        });
+//        Call<Movies> popular = service.getMovies(getString(R.string.pref_sort_popular), BuildConfig.THE_MOVIE_API_KEY, 1);
+//        popular.enqueue(new retrofit2.Callback<Movies>() {
+//            @Override
+//            public void onResponse(Call<Movies> call, Response<Movies> response) {
+//                if (response.isSuccessful()) {
+//                    Movies result = response.body();
+//                    result.setGroupTitle(getString(R.string.pref_sort_popular));
+//                    updateView(result);
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<Movies> call, Throwable t) {
+//
+//            }
+//        });
     }
 
     private void updateView(Movies movies) {
@@ -142,9 +98,24 @@ public class MoviesFragment extends Fragment {
         moviesList.add(movies);
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_layout, mContainer, false);
         TextView titleTxt = (TextView) view.findViewById(R.id.group_title);
-        SimpleImageView firstPosterImg = (SimpleImageView) view.findViewById(R.id.first_movie);
-        SimpleImageView secondPosterImg = (SimpleImageView) view.findViewById(R.id.second_movie);
-        SimpleImageView thirdPosterImg = (SimpleImageView) view.findViewById(R.id.third_movie);
+        AspectRatioImageView firstPosterImg = (AspectRatioImageView) view.findViewById(R.id.first_movie);
+        AspectRatioImageView secondPosterImg = (AspectRatioImageView) view.findViewById(R.id.second_movie);
+        AspectRatioImageView thirdPosterImg = (AspectRatioImageView) view.findViewById(R.id.third_movie);
+        thirdPosterImg.setTag(movies.getResults().get(2));
+        thirdPosterImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Movies.Movie movie = (Movies.Movie) v.getTag();
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                intent.putExtra("data", movie);
+                startActivity(intent);
+            }
+        });
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            }
+        });
         titleTxt.setText(movies.getGroupTitle());
         Picasso.with(getActivity())
                 .load(movies.getResults().get(0).getPoster())

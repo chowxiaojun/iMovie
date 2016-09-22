@@ -13,7 +13,7 @@ import android.view.MenuItem;
 
 import com.orhanobut.logger.Logger;
 import com.xiroid.imovie.R;
-import com.xiroid.imovie.Utility;
+import com.xiroid.imovie.utils.Utility;
 import com.xiroid.imovie.fragment.MoviesFragment;
 
 public class MainActivity extends AppCompatActivity

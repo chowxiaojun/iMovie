@@ -34,7 +34,7 @@
             android:orientation="horizontal"
             android:padding="16dp">
 
-            <com.xiroid.imovie.SimpleImageView
+            <com.xiroid.imovie.widget.AspectRatioImageView
                 android:id="@+id/image_poster"
                 android:layout_width="100dp"
                 android:layout_height="150dp"
