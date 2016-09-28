@@ -12,17 +12,17 @@ import com.xiroid.imovie.R;
  */
 public class Utility {
 
-    public static String getDataSourceCategory(Context context) {
+    public static int getDataSourceCategory(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getString(context.getString(R.string.pref_data_source_type),
-                context.getString(R.string.data_source_movie));
+        return sp.getInt(context.getString(R.string.pref_sort_key),
+                R.string.pref_sort_label_now_playing);
     }
 
     public static void setDataSourceCategory(Context context, int resId) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(context.getString(R.string.pref_data_source_type),
-                context.getString(resId));
+        editor.putInt(context.getString(R.string.pref_sort_key),
+                resId);
         editor.apply();
     }
 }

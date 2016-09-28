@@ -38,7 +38,7 @@
                 android:id="@+id/image_poster"
                 android:layout_width="100dp"
                 android:layout_height="150dp"
-                android:src="@drawable/placeholder" />
+                android:src="@drawable/placeholder_movie_details_image" />
 
             <LinearLayout
                 android:layout_width="wrap_content"

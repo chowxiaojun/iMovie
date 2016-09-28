@@ -20,21 +20,17 @@ import java.util.List;
  * @date 16/6/19
  */
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder> {
-    private ArrayList<Movies> moviesList = new ArrayList<>();
+    private List<Movies.Movie> movies = new ArrayList<>();
     private Context context;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public AspectRatioImageView firstPosterImg;
-        public AspectRatioImageView secondPosterImg;
-        public AspectRatioImageView thirdPosterImg;
-        public TextView groupTitleTxt;
+        public AspectRatioImageView posterImg;
+        public TextView titleTxt;
 
         public ViewHolder(View view) {
             super(view);
-            firstPosterImg = (AspectRatioImageView) view.findViewById(R.id.first_movie);
-            secondPosterImg = (AspectRatioImageView) view.findViewById(R.id.second_movie);
-            thirdPosterImg = (AspectRatioImageView) view.findViewById(R.id.third_movie);
-            groupTitleTxt = (TextView) view.findViewById(R.id.group_title);
+            titleTxt = (TextView) view.findViewById(R.id.txt_title);
+            posterImg = (AspectRatioImageView) view.findViewById(R.id.iv_poster);
         }
     }
 
@@ -51,7 +47,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     public ViewHolder onCreateViewHolder(ViewGroup parent,
                                          int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_item_layout, parent, false);
+                .inflate(R.layout.grid_movies_item, parent, false);
         return new ViewHolder(v);
     }
 
@@ -63,35 +59,21 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Logger.d("onBindViewHolder" + moviesList.size() + " position: " + position);
-        Movies movies = moviesList.get(position);
-        holder.groupTitleTxt.setText(movies.getGroupTitle());
-        Picasso.with(context)
-                .load(movies.getResults().get(0).getPoster())
-                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
-                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
-                .into(holder.firstPosterImg);
-        Picasso.with(context)
-                .load(movies.getResults().get(1).getPoster())
-                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
-                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
-                .into(holder.secondPosterImg);
-        Picasso.with(context)
-                .load(movies.getResults().get(2).getPoster())
-                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
-                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
-                .into(holder.thirdPosterImg);
+        Logger.d("onBindViewHolder" + movies.size() + " position: " + position);
+        Movies.Movie movie = movies.get(position);
+        holder.titleTxt.setText(movie.getTitle());
+        Picasso.with(context).load(movie.getPoster()).into(holder.posterImg);
     }
 
     @Override
     public int getItemCount() {
-        return moviesList.size();
+        return movies.size();
     }
 
 
-    public void addMovies(Movies movies) {
+    public void addMovies(List<Movies.Movie> movies) {
         Logger.d("addMovies");
-        moviesList.add(movies);
-        notifyItemInserted(moviesList.size() - 1);
+        this.movies = movies;
+        notifyItemInserted(this.movies.size() - 1);
     }
 }

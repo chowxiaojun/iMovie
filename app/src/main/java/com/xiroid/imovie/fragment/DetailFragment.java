@@ -76,7 +76,7 @@ public class DetailFragment extends Fragment {
                     getContext().getContentResolver().delete(
                             MovieContract.FavoriteEntry.CONTENT_URI,
                             MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + " = ?",
-                            new String[]{Integer.toString(movie.getId())}
+                            new String[]{Long.toString(movie.getId())}
                     );
                 }
             }
@@ -113,8 +113,8 @@ public class DetailFragment extends Fragment {
 
                 Picasso.with(getActivity())
                         .load(movie.getPoster())
-                        .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
-                        .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
+                        .placeholder(R.drawable.placeholder_movie_item_image) // TODO: 需要一套合适的占位图
+                        .error(R.drawable.placeholder_movie_item_image) // TODO: 需要一套合适的错误图
                         .into(poster);
                 if (releaseDate != null) {
                     releaseDate.setText(movie.getRelease_date().split("-")[0]);

@@ -25,7 +25,10 @@
     <string name="data_source_movie">Movie</string>
     <string name="data_source_tv">TV</string>
 
-    <string name="txt_main_loading">loading...</string>
+    <string name="nav_item_share">Share</string>
+    <string name="nav_item_about">About</string>
+
+    <string name="txt_main_loading">loading…</string>
     <string name="txt_empty_network_err">Network Error</string>
     <string name="txt_empty_no_favorites">No Favorites</string>
 

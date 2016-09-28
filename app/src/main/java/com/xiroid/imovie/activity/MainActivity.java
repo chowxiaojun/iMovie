@@ -21,6 +21,8 @@ public class MainActivity extends AppCompatActivity
 
     private static final String MOVIES_FRAGMENT_TAG = "movies_fragment";
 
+    private int category;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,24 +54,37 @@ public class MainActivity extends AppCompatActivity
     /**
      * 设置当前电影分类
      *
-     * @param navigationView
+     * @param navigationView 左边的抽屉菜单
      */
     private void setCheckedItem(NavigationView navigationView) {
         if (navigationView == null) {
             return;
         }
 
-        String sourceType = Utility.getDataSourceCategory(getApplicationContext());
-        switch (sourceType) {
-            case "Movie": {
-                navigationView.setCheckedItem(R.id.nav_movie);
-                setTitle(R.string.data_source_movie);
+        category = Utility.getDataSourceCategory(getApplicationContext());
+
+        switch (category) {
+            case R.string.pref_sort_now_playing: {
+                navigationView.setCheckedItem(R.id.nav_now_playing);
+                setTitle(R.string.pref_sort_label_now_playing);
                 break;
             }
-            case "TV": {
-                navigationView.setCheckedItem(R.id.nav_tv);
-                setTitle(R.string.data_source_tv);
+            case R.string.pref_sort_upcoming: {
+                navigationView.setCheckedItem(R.id.nav_upcoming);
+                setTitle(R.string.pref_sort_label_upcoming);
                 break;
+            }
+            case R.string.pref_sort_popular: {
+                navigationView.setCheckedItem(R.id.nav_popular);
+                setTitle(R.string.pref_sort_label_popular);
+            }
+            case R.string.pref_sort_top_rated: {
+                navigationView.setCheckedItem(R.id.nav_top_rated);
+                setTitle(R.string.pref_sort_label_top_rated);
+            }
+            case R.string.pref_sort_favorite: {
+                navigationView.setCheckedItem(R.id.nav_favorite);
+                setTitle(R.string.pref_sort_label_favorite);
             }
             default:
                 break;
@@ -122,18 +137,35 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.nav_movie) {
-            Utility.setDataSourceCategory(getApplicationContext(), R.string.data_source_movie);
-            setTitle(R.string.data_source_movie);
-        } else if (id == R.id.nav_tv) {
-            Utility.setDataSourceCategory(getApplicationContext(), R.string.data_source_tv);
-            setTitle(R.string.data_source_tv);
-        }  else if (id == R.id.nav_share) {
-        } else if (id == R.id.nav_send) {
+
+        switch (id) {
+            case R.id.nav_now_playing: {
+                category = R.string.pref_sort_now_playing;
+                setTitle(R.string.pref_sort_label_now_playing);
+                break;
+            }
+            case R.id.nav_upcoming: {
+                setTitle(R.string.pref_sort_label_upcoming);
+                break;
+            }
+            case R.id.nav_popular: {
+                break;
+            }
+            case R.id.nav_top_rated: {
+                break;
+            }
+            case R.id.nav_favorite: {
+                break;
+            }
+            case R.id.nav_share: {
+                break;
+            }
+            case R.id.nav_about: {
+                break;
+            }
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

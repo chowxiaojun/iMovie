@@ -1,24 +1,27 @@
 package com.xiroid.imovie.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
-import android.widget.TextView;
 
 import com.orhanobut.logger.Logger;
-import com.squareup.picasso.Picasso;
+import com.xiroid.imovie.BuildConfig;
+import com.xiroid.imovie.MoviesAdapter;
 import com.xiroid.imovie.R;
-import com.xiroid.imovie.activity.DetailActivity;
+import com.xiroid.imovie.api.ApiModule;
 import com.xiroid.imovie.data.MovieContract;
 import com.xiroid.imovie.model.Movies;
-import com.xiroid.imovie.widget.AspectRatioImageView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Response;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -29,8 +32,9 @@ public class MoviesFragment extends Fragment {
     private static final String MOVIE_LIST = "movie_list";
 
     View progressView;
-    ViewGroup mContainer;
-    private List<Movies> moviesList = new ArrayList<>();
+    RecyclerView recyclerView;
+    MoviesAdapter moviesAdapter;
+    private List<Movies.Movie> movies = new ArrayList<>();
 
     private int mPosition = GridView.INVALID_POSITION;
 
@@ -58,8 +62,12 @@ public class MoviesFragment extends Fragment {
                              Bundle savedInstanceState) {
         Logger.d("onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        mContainer = (ViewGroup) rootView.findViewById(R.id.container);
         progressView = rootView.findViewById(R.id.progress_view);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+        moviesAdapter = new MoviesAdapter(getActivity());
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+        recyclerView.setLayoutManager(gridLayoutManager);
+        recyclerView.setAdapter(moviesAdapter);
         if (savedInstanceState != null
                 && savedInstanceState.containsKey(SELECT_KEY)
                 && savedInstanceState.containsKey(MOVIE_LIST)) {
@@ -73,66 +81,31 @@ public class MoviesFragment extends Fragment {
     public void onStart() {
         super.onStart();
         Logger.d("onStart");
-//        Call<Movies> popular = service.getMovies(getString(R.string.pref_sort_popular), BuildConfig.THE_MOVIE_API_KEY, 1);
-//        popular.enqueue(new retrofit2.Callback<Movies>() {
-//            @Override
-//            public void onResponse(Call<Movies> call, Response<Movies> response) {
-//                if (response.isSuccessful()) {
-//                    Movies result = response.body();
-//                    result.setGroupTitle(getString(R.string.pref_sort_popular));
-//                    updateView(result);
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<Movies> call, Throwable t) {
-//
-//            }
-//        });
+        Call<Movies> popular = ApiModule.getMovieApi()
+                .getMovies("popularity.desc", BuildConfig.THE_MOVIE_API_KEY, 1);
+        popular.enqueue(new retrofit2.Callback<Movies>() {
+            @Override
+            public void onResponse(Call<Movies> call, Response<Movies> response) {
+                if (response.isSuccessful()) {
+                    Movies result = response.body();
+                    result.setGroupTitle(getString(R.string.pref_sort_popular));
+                    updateView(result);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Movies> call, Throwable t) {
+                Logger.d("onFailure");
+            }
+        });
     }
 
-    private void updateView(Movies movies) {
+    private void updateView(Movies rsp) {
         if (progressView.getVisibility() == View.VISIBLE) {
             progressView.setVisibility(View.GONE);
         }
-        moviesList.add(movies);
-        View view = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_layout, mContainer, false);
-        TextView titleTxt = (TextView) view.findViewById(R.id.group_title);
-        AspectRatioImageView firstPosterImg = (AspectRatioImageView) view.findViewById(R.id.first_movie);
-        AspectRatioImageView secondPosterImg = (AspectRatioImageView) view.findViewById(R.id.second_movie);
-        AspectRatioImageView thirdPosterImg = (AspectRatioImageView) view.findViewById(R.id.third_movie);
-        thirdPosterImg.setTag(movies.getResults().get(2));
-        thirdPosterImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Movies.Movie movie = (Movies.Movie) v.getTag();
-                Intent intent = new Intent(getActivity(), DetailActivity.class);
-                intent.putExtra("data", movie);
-                startActivity(intent);
-            }
-        });
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            }
-        });
-        titleTxt.setText(movies.getGroupTitle());
-        Picasso.with(getActivity())
-                .load(movies.getResults().get(0).getPoster())
-                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
-                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
-                .into(firstPosterImg);
-        Picasso.with(getActivity())
-                .load(movies.getResults().get(1).getPoster())
-                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
-                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
-                .into(secondPosterImg);
-        Picasso.with(getActivity())
-                .load(movies.getResults().get(2).getPoster())
-                .placeholder(R.drawable.placeholder) // TODO: 需要一套合适的占位图
-                .error(R.drawable.placeholder) // TODO: 需要一套合适的错误图
-                .into(thirdPosterImg);
-        mContainer.addView(view);
+        this.movies = rsp.getResults();
+        moviesAdapter.addMovies(movies);
     }
 
 

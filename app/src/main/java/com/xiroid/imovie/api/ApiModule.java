@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * @date 16/9/22
  */
 public class ApiModule {
-    private static final String BASE_URL = "http://api.themoviedb.org/3/";
+    private static final String BASE_URL = "http://api.themoviedb.org/";
     private static MovieApi movieApi;
 
     public static MovieApi getMovieApi() {

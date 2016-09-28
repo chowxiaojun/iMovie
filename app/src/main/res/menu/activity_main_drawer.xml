@@ -4,22 +4,31 @@
     <group
         android:id="@+id/data_source_category"
         android:checkableBehavior="single">
+
         <item
-            android:id="@+id/nav_movie"
-            android:title="@string/data_source_movie" />
+            android:id="@+id/nav_now_playing"
+            android:title="@string/pref_sort_label_now_playing" />
         <item
-            android:id="@+id/nav_tv"
-            android:title="@string/data_source_tv" />
+            android:id="@+id/nav_upcoming"
+            android:title="@string/pref_sort_upcoming" />
+        <item
+            android:id="@+id/nav_popular"
+            android:title="@string/pref_sort_label_popular" />
+        <item
+            android:id="@+id/nav_top_rated"
+            android:title="@string/pref_sort_label_top_rated" />
+        <item
+            android:id="@+id/nav_favorite"
+            android:title="@string/pref_sort_label_favorite" />
     </group>
 
-    <group
-        android:id="@+id/setting">
+    <group android:id="@+id/setting">
         <item
             android:id="@+id/nav_share"
-            android:title="Share" />
+            android:title="@string/nav_item_share" />
         <item
-            android:id="@+id/nav_send"
-            android:title="About" />
+            android:id="@+id/nav_about"
+            android:title="@string/nav_item_about" />
     </group>
 
 </menu>
